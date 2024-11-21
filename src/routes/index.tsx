@@ -5,8 +5,23 @@ import { Route } from "react-router-dom";
 import { AuthLayout } from "@/layouts/AuthLayout";
 import { NotFound } from "@/layouts/NotFound";
 import { PublicRoute } from "./PublicRoute";
-import { Login } from "@/pages/Login";
-import { DashboardPage } from "@/pages/DashboardPage";
+import { getPageRoutes } from "@/helpers";
+
+export const authenticationPagePaths = {
+  Index: "../pages/Register.tsx",
+  Login: '../pages/Login',
+  Verification: "../pages/Verification.tsx",
+  ForgotPassword: "../pages/ForgotPassword.tsx",
+
+} as const
+
+export const dashboardPagePaths = {
+  Home: "../pages/DashboardPage",
+  Login: '../pages/Login',
+} as const
+
+const pageRoutes = getPageRoutes(authenticationPagePaths);
+export const dashboardPageRoutes = getPageRoutes(dashboardPagePaths, "dashboard");
 
 export const routes = (
   <>
@@ -15,7 +30,7 @@ export const routes = (
       element={<AuthLayout />}
       errorElement={<NotFound></NotFound>}
     >
-      {[{ path: "/", element: <Login /> }].map((item, index) => (
+      {pageRoutes.map((item, index) => (
         <Route
           key={index}
           path={item.path}
@@ -29,7 +44,7 @@ export const routes = (
       errorElement={<ErrorFallback />}
       element={<Dashboard />}
     >
-      {[{ path: "/dashboard/home", element: <DashboardPage /> }].map(
+      {dashboardPageRoutes.map(
         (item, index) => (
           <Route
             key={index}

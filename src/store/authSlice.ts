@@ -7,6 +7,7 @@ import {
   ZustandFuncSelectors,
 } from "auto-zustand-selectors-hook";
 import { User } from "../types";
+import { getDemoToken, getDemoUser } from "@/demo";
 
 type InitialState = {
   user: User | null;
@@ -24,8 +25,8 @@ type Actions = {
 };
 
 const initialState: InitialState = {
-  user: null,
-  token: null,
+  user: getDemoUser(),
+  token: getDemoToken(),
   refresh: null,
   authorities: [],
 };

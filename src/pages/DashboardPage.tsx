@@ -1,4 +1,4 @@
-export const DashboardPage = () => {
+export const Home = () => {
   return (
     <>here</>
   )

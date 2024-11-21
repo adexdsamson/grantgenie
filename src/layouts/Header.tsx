@@ -9,7 +9,7 @@ import {
 import { useToastHandlers } from "@/hooks/useToaster";
 import { useSetReset, useUser } from "@/store/authSlice";
 import { ApiResponseError } from "@/types";
-import { SearchIcon, ChevronDown, LogOut } from "lucide-react";
+import { SearchIcon, ChevronDown, LogOut, Sidebar } from "lucide-react";
 import { FaUser } from "react-icons/fa";
 import { FaRegBell } from "react-icons/fa6";
 import { GrUserAdmin } from "react-icons/gr";
@@ -20,36 +20,35 @@ import { HiBars3 } from "react-icons/hi2";
 import { useMediaQuery } from "usehooks-ts";
 
 type HeaderProps = {
-  showSideBarOnSM: boolean;
-  showSideBar: boolean;
+  title: string
+  show: boolean;
   setShow: (value: boolean) => void;
-  setSidebarCollapsed: (value: boolean) => void;
-  isSidebarCollapsed: boolean;
 };
 
 export const Header = (props: HeaderProps) => {
+  const isMobile = useMediaQuery("(max-width: 768px)");
   const toggleSidebar = () => {
-    props.setSidebarCollapsed(!props.isSidebarCollapsed);
-    props.setShow(!props.showSideBar);
+    props.setShow(!props.show);
   };
 
   return (
-    <header className="py-3 px-5 flex items-center justify-between shadow-md">
-      {props.showSideBarOnSM ? (
-        <ToggleButton
-          {...{ isSidebarCollapsed: props.isSidebarCollapsed, toggleSidebar }}
-        />
-      ) : (
-        <SearchComponent />
-      )}
+    <header className="py-3 px-5 flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        {!props.show ? (
+          <ToggleButton
+            {...{ isSidebarCollapsed: props.show, toggleSidebar }}
+          />
+        ) : null}
+        <h4>Dashboard</h4>
+      </div>
 
       <div className="flex items-center">
-        {props.showSideBarOnSM ? null : (
+        {/* {isMobile ? null : (
           <div className="h-10 w-10 bg-gray-200 rounded-full cursor-pointer grid place-items-center mr-4">
             <FaRegBell className="text-black" />
           </div>
-        )}
-        <div className="h-6 bg-gray-400 w-0.5 rounded-lg" />
+        )} */}
+        {/* <div className="h-6 bg-gray-400 w-0.5 rounded-lg" /> */}
         <DropdownMenuDemo />
       </div>
     </header>
@@ -71,22 +70,12 @@ const SearchComponent = () => {
 
 type ToggleButtonProps = {
   toggleSidebar: () => void;
-  isSidebarCollapsed: boolean;
 };
 
-const ToggleButton = ({
-  isSidebarCollapsed,
-  toggleSidebar,
-}: ToggleButtonProps) => {
+const ToggleButton = ({ toggleSidebar }: ToggleButtonProps) => {
   return (
     <div onClick={toggleSidebar} className={` cursor-pointer`}>
-      {isSidebarCollapsed ? (
-        <div className=" hover:bg-primary/40 rounded-full bg-gray-100  transition-colors duration-500 p-0.5">
-          <IoMdClose size={28} />
-        </div>
-      ) : (
-        <HiBars3 size={30} />
-      )}
+      <Sidebar />
     </div>
   );
 };
@@ -123,15 +112,14 @@ export function DropdownMenuDemo() {
             {!matches ? null : (
               <div>
                 <p className="text-sm text-primary text-center">{`${user?.first_name} ${user?.last_name}`}</p>
-                <p className="text-xs text-center text-[#5D0003] ">admin</p>
               </div>
             )}
-            <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
+            {/* <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" /> */}
           </div>
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-48">
-        <DropdownMenuItem>
+        {/* <DropdownMenuItem>
           <TbUserHexagon className="mr-2 h-4 w-4 text-gray-600" />
           <span className="text-xs">My Profile</span>
         </DropdownMenuItem>
@@ -147,7 +135,7 @@ export function DropdownMenuDemo() {
         <DropdownMenuItem onClick={handleLogOut}>
           <LogOut className="mr-2 h-4 w-4 text-primary" />
           <span className="text-primary text-xs">Log out</span>
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
       </DropdownMenuContent>
     </DropdownMenu>
   );

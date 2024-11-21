@@ -19,6 +19,7 @@ import {
   UseFormReturn,
   useForm,
   DefaultValues,
+  Control,
 } from "react-hook-form";
 import { Forger, ForgerSlotProps } from "../Forger";
 import {
@@ -28,13 +29,24 @@ import {
   isInputSlot,
 } from "../utils";
 
-type ForgerProps = {
-  name: string;
+type ForgePropsWithComponent<TFieldProps = unknown> = TFieldProps & {
+  name: keyof FieldValues;
   component: typeof Component<ForgerSlotProps> | any;
   label?: string;
 };
 
-export type FieldProps<TFieldProps = unknown> = ForgerProps & TFieldProps;
+interface ForgePropWithElement<TFieldValues extends FieldValues = FieldValues> {
+  element:
+    | React.ReactNode
+    | ((props: {
+        control: Control<TFieldValues>;
+      }) => JSX.Element);
+}
+
+export type FieldProps<
+  TFieldProps = unknown,
+  TFieldValues extends FieldValues = FieldValues
+> = ForgePropsWithComponent<TFieldProps> | ForgePropWithElement<TFieldValues>;
 
 type ForgeProps<
   TFieldProps = unknown,
