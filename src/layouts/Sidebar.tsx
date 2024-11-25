@@ -1,16 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { MdDashboard } from "react-icons/md";
-import { Building2, Sidebar } from "lucide-react";
-import { RxHamburgerMenu } from "react-icons/rx";
+import { Building2, FileText, LayoutDashboard, Sidebar, Users } from "lucide-react";
 import Img from "../assets/GrantGenie Logo.svg";
 import { MdLogout } from "react-icons/md";
 import { Link, useLocation } from "react-router-dom";
 
-import { ComponentClass, ComponentProps, FunctionComponent } from "react";
 import { ConfirmAlert } from "@/components/layouts/ConfirmAlert";
-import { IconType } from "react-icons/lib";
 import { useMediaQuery } from "usehooks-ts";
 import { useUser } from "@/store/authSlice";
+import { dashboardPageRoutes } from "@/routes";
 
 type sideBarProps = {
   show: boolean;
@@ -18,32 +15,27 @@ type sideBarProps = {
 };
 
 type NavigationItem = {
-  icon: IconType;
+  icon: any;
   title: string;
   to: string;
   active: boolean;
   isImage?: boolean;
 };
 
+const Icons = {
+  dashboard: LayoutDashboard,
+  home: LayoutDashboard,
+  employees: Users,
+  agencies: Building2,
+  projects: FileText,
+}
+
+
+
 export const SideBar = ({ setShow, show }: sideBarProps) => {
   const user = useUser();
   const location = useLocation();
   const isMobile = useMediaQuery("(max-width: 768px)");
-
-  const navigation: NavigationItem[] = [
-    {
-      icon: MdDashboard,
-      title: "Dashboard",
-      to: "/dashboard/home",
-      active: location.pathname === "/dashboard/home",
-    },
-    // {
-    //   icon: MdDashboard,
-    //   title: "",
-    //   to: "",
-    //   active: location.pathname === "/dashboard/home",
-    // },
-  ];
 
   const isActive = (link: string) => {
     // Check if the current location matches the link exactly or starts with it,
@@ -69,11 +61,26 @@ export const SideBar = ({ setShow, show }: sideBarProps) => {
     return location.pathname.startsWith(link);
   };
 
+  const renderNavigation = () => {
+    return dashboardPageRoutes?.slice?.(0, 4)?.map?.(item => {
+      const title = item?.path?.split("/")?.[2] as keyof typeof Icons;
+      return { 
+        icon: Icons?.[title], 
+        title: Object.keys(Icons).find(item => title === "home" ? "dashboard" : item === title) ?? "",
+        to: item?.path,
+        active: isActive(item?.path)
+      }
+    })
+  }
+
+  const navigation: NavigationItem[] = renderNavigation();
+  
+
   const mobileSidebarCss = show
     ? "translate-x-0 absolute h-full z-50 w-80"
     : "-translate-x-full h-full absolute z-50";
 
-  const sidebarCss = show ? "translate-x-0 min-w-[18rem]" : "-translate-x-80 ";
+  const sidebarCss = show ? "translate-x-0 min-w-[16rem]" : "-translate-x-80 ";
 
   return (
     <aside
@@ -109,18 +116,6 @@ export const SideBar = ({ setShow, show }: sideBarProps) => {
           />
         ))}
 
-        <Link
-          to="/agencies"
-          className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 ${
-            false
-              ? "bg-sidebar-active text-white"
-              : "text-gray-600 hover:bg-sidebar-hover"
-          }`}
-        >
-          <Building2 size={20} />
-          <span>Agencies</span>
-        </Link>
-
         <ConfirmAlert
           text="Are you sure you want to log out?"
           title="Log Out"
@@ -144,7 +139,7 @@ type SidebarItemProps = {
   className?: string;
   isImage?: boolean;
   to: string;
-  icon: ComponentProps<FunctionComponent<any> | ComponentClass<any, any>>;
+  icon: any;
 };
 
 const SidebarItem = (props: SidebarItemProps) => {
@@ -152,31 +147,31 @@ const SidebarItem = (props: SidebarItemProps) => {
   return (
     <Link
       to={props.to}
-      className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 ${
+      className={`flex items-center gap-3 px-4 py-3 mb-4 rounded-lg transition-all duration-200 ${
         props.active
-          ? "bg-sidebar-active text-white"
+          ? "bg-[#483F6F] text-white"
           : "text-gray-600 hover:bg-sidebar-hover"
       } ${props.className ?? ""}`}
     >
       <SidebarItemIcon icon={Icon} isImage={props.isImage} />
-      <h6 className="font-medium text-sm text-white">{props.title}</h6>
+      <h6 className="font-medium text-sm">{props.title}</h6>
     </Link>
   );
 };
 
 type SidebarItemIconProps = {
   isImage?: boolean;
-  icon: ComponentProps<FunctionComponent<any> | ComponentClass<any, any>>;
+  icon: any;
 };
 
 const SidebarItemIcon = (props: SidebarItemIconProps) => {
-  const Icon = props.icon;
+  const Icon = props?.icon;
   return (
     <div className=" rounded-md grid place-items-center">
       {props?.isImage ? (
         <img src={props.icon} className="h-5 w-5 text-primary" />
       ) : (
-        <Icon className="h-5 w-5 text-primary" />
+        <Icon className="h-5 w-5" />
       )}
     </div>
   );

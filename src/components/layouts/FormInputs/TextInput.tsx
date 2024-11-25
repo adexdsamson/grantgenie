@@ -1,6 +1,13 @@
+import {
+  FileInput,
+  FileUploader,
+  FileUploaderContent,
+  FileUploaderItem,
+} from "@/components/ui/file-upload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { File, Paperclip } from "lucide-react";
 import { ReactNode } from "react";
 
 export type TextInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
@@ -9,17 +16,27 @@ export type TextInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   error?: string;
   startAdornment?: ReactNode;
   endAdornment?: ReactNode;
-  helperText?: string
+  helperText?: string;
 };
 
-export type TextAreaProps = React.InputHTMLAttributes<HTMLTextAreaElement> & {
+export type TextFileProps = React.InputHTMLAttributes<HTMLInputElement> & {
   label?: string | JSX.Element;
   containerClass?: string;
   error?: string;
   startAdornment?: ReactNode;
   endAdornment?: ReactNode;
-  rows?: number;
+  helperText?: string;
+  files: File[] | null;
+  onChange: (value: File[] | null) => void;
+};
 
+export type TextAreaProps = React.InputHTMLAttributes<HTMLTextAreaElement> & {
+  error?: string;
+  rows?: number;
+  containerClass?: string;
+  endAdornment?: ReactNode;
+  startAdornment?: ReactNode;
+  label?: string | JSX.Element;
 };
 
 export const TextInput = (props: TextInputProps) => {
@@ -35,13 +52,9 @@ export const TextInput = (props: TextInputProps) => {
       >
         {props.label}
       </Label>
-    
+
       <div className="relative">
-        <Input
-          {...props}
-          id={props.name}
-          className="peer pe-9"
-        />
+        <Input {...props} id={props.name} className="peer pe-9" />
         <div className="pointer-events-none absolute inset-y-0 end-0 flex items-center justify-center pe-3 text-muted-foreground/80 peer-disabled:opacity-50">
           {props.endAdornment}
         </div>
@@ -59,7 +72,6 @@ export const TextInput = (props: TextInputProps) => {
     </div>
   );
 };
-
 
 export const TextArea = (props: TextAreaProps) => {
   return (
@@ -81,5 +93,54 @@ export const TextArea = (props: TextAreaProps) => {
       </div>
       <span className="text-xs text-red-500 mt-1">{props.error}</span>
     </div>
+  );
+};
+
+const FileSvgDraw = () => {
+  return (
+    <>
+      <File />
+      <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
+        <span className="font-semibold">Click to upload</span>
+        &nbsp; or drag and drop
+      </p>
+      <p className="text-xs text-gray-500 dark:text-gray-400">
+        SVG, PNG, JPG or GIF
+      </p>
+    </>
+  );
+};
+
+export const TextFileUploader = (props: TextFileProps) => {
+  const dropZoneConfig = {
+    maxFiles: 5,
+    maxSize: 1024 * 1024 * 4,
+    multiple: true,
+  };
+
+  return (
+    <FileUploader
+      {...props}
+      value={props.files}
+      onValueChange={(files) => props?.onChange?.(files)}
+      dropzoneOptions={dropZoneConfig}
+      className="relative bg-background rounded-lg p-2"
+    >
+      <FileInput className="outline-dashed outline-1 outline-white">
+        <div className="flex items-center justify-center flex-col pt-3 pb-4 w-full ">
+          <FileSvgDraw />
+        </div>
+      </FileInput>
+      <FileUploaderContent>
+        {props.files &&
+          props.files.length > 0 &&
+          props.files.map((file, i) => (
+            <FileUploaderItem key={i} index={i}>
+              <Paperclip className="h-4 w-4 stroke-current" />
+              <span>{file.name}</span>
+            </FileUploaderItem>
+          ))}
+      </FileUploaderContent>
+    </FileUploader>
   );
 };

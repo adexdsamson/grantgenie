@@ -3,9 +3,11 @@ import { Outlet } from "react-router-dom";
 import { SideBar } from "./Sidebar";
 import { Header } from "./Header";
 import { useState } from "react";
+import { useMediaQuery } from "usehooks-ts";
 
 export const Dashboard = () => {
-  const [show, setShow] = useState<boolean>(false);
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  const [show, setShow] = useState<boolean>(isMobile ? false : true);
 
   return (
     <Container
@@ -21,7 +23,7 @@ export const Dashboard = () => {
         noGutter
         className="flex-1 overflow-auto rounded-lg bg-white my-2 mx-2"
       >
-        <Header show={show} setShow={setShow} />
+        <Header show={show} setShow={setShow} title="Dashboard" />
 
         <Container>
           <Outlet />

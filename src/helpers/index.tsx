@@ -50,3 +50,7 @@ export const getPageRoutes = (pagePaths: PagePaths, type: "index" | "dashboard" 
         return { path: `/dashboard/${pageTitle.toLowerCase()}`, element: <Component /> }
       })
 } 
+
+export const getPagePath = (pagePaths: PagePaths, name: keyof typeof dashboardPagePaths) => {
+    return Object.entries(pagePaths).find(item => item[0].includes(name));
+}

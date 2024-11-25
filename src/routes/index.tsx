@@ -17,7 +17,8 @@ export const authenticationPagePaths = {
 
 export const dashboardPagePaths = {
   Home: "../pages/DashboardPage",
-  Login: '../pages/Login',
+  Projects: '../pages/Projects/index.tsx',
+  Employees: '../pages/Employees/index.tsx',
 } as const
 
 const pageRoutes = getPageRoutes(authenticationPagePaths);

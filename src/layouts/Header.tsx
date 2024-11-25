@@ -9,14 +9,9 @@ import {
 import { useToastHandlers } from "@/hooks/useToaster";
 import { useSetReset, useUser } from "@/store/authSlice";
 import { ApiResponseError } from "@/types";
-import { SearchIcon, ChevronDown, LogOut, Sidebar } from "lucide-react";
+import { SearchIcon, Sidebar } from "lucide-react";
 import { FaUser } from "react-icons/fa";
-import { FaRegBell } from "react-icons/fa6";
-import { GrUserAdmin } from "react-icons/gr";
-import { IoMdClose } from "react-icons/io";
-import { TbUserHexagon, TbSettings2 } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
-import { HiBars3 } from "react-icons/hi2";
 import { useMediaQuery } from "usehooks-ts";
 
 type HeaderProps = {
@@ -39,7 +34,7 @@ export const Header = (props: HeaderProps) => {
             {...{ isSidebarCollapsed: props.show, toggleSidebar }}
           />
         ) : null}
-        <h4>Dashboard</h4>
+        <h4>{props.title}</h4>
       </div>
 
       <div className="flex items-center">
