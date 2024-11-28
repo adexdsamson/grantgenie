@@ -25,13 +25,14 @@ type ConfirmAlertProps = {
   trigger?: ReactNode;
   onClose?: (open: boolean) => void;
   logout?: boolean;
+  body?: Record<string, any>
 };
 export const ConfirmAlert = (props: ConfirmAlertProps) => {
   const setReset = useSetReset();
   const toastHandlers = useToastHandlers();
 
   const mutation = useMutation<ApiResponse<any>, ApiResponseError, undefined>({
-    mutationFn: () => deleteRequest(props.url),
+    mutationFn: () => deleteRequest(props.url, props?.body),
   });
 
   const handleSubmit = async () => {

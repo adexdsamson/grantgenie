@@ -30,17 +30,13 @@ type FormState = {
   description: string;
 };
 
-//      "name": "My name",
-// "email": "autogon@gmail.com",
-// "cv_link": "https://storage.com"
-
 const schema = yup.object({
   name: yup.string().required(),
   agency: yup.string().required(),
   description: yup.string().required(),
 });
 
-export const CreateEmployeeDialog = () => {
+export const CreateAgency = () => {
   const queryClient = useQueryClient();
   const { error, success } = useToastHandlers();
 
@@ -50,7 +46,7 @@ export const CreateEmployeeDialog = () => {
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (payload: FormState) =>
-      postRequest("/grants/employees/", payload),
+      postRequest("/grants/agencies/", payload),
   });
 
   const handleSubmit = async (data: FormState) => {
@@ -73,14 +69,14 @@ export const CreateEmployeeDialog = () => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Add Employee</Button>
+        <Button>Add Agency</Button>
       </DialogTrigger>
       <DialogContent>
         <ForgeForm onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Add employee details</DialogTitle>
+            <DialogTitle>Add Agency</DialogTitle>
             <DialogDescription>
-              Provide the necessary detail of your employee
+              Provide information of the agency not available.
             </DialogDescription>
           </DialogHeader>
 

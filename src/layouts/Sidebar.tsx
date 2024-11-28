@@ -1,13 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Building2, FileText, LayoutDashboard, Sidebar, Users } from "lucide-react";
+import {
+  Building2,
+  FileText,
+  LayoutDashboard,
+  Sidebar,
+  Users,
+} from "lucide-react";
 import Img from "../assets/GrantGenie Logo.svg";
-import { MdLogout } from "react-icons/md";
+import { MdLogout, MdInfoOutline } from "react-icons/md";
 import { Link, useLocation } from "react-router-dom";
 
 import { ConfirmAlert } from "@/components/layouts/ConfirmAlert";
 import { useMediaQuery } from "usehooks-ts";
 import { useUser } from "@/store/authSlice";
 import { dashboardPageRoutes } from "@/routes";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { FaUser } from "react-icons/fa";
 
 type sideBarProps = {
   show: boolean;
@@ -28,9 +36,7 @@ const Icons = {
   employees: Users,
   agencies: Building2,
   projects: FileText,
-}
-
-
+};
 
 export const SideBar = ({ setShow, show }: sideBarProps) => {
   const user = useUser();
@@ -62,19 +68,21 @@ export const SideBar = ({ setShow, show }: sideBarProps) => {
   };
 
   const renderNavigation = () => {
-    return dashboardPageRoutes?.slice?.(0, 4)?.map?.(item => {
+    return dashboardPageRoutes?.slice?.(0, 4)?.map?.((item) => {
       const title = item?.path?.split("/")?.[2] as keyof typeof Icons;
-      return { 
-        icon: Icons?.[title], 
-        title: Object.keys(Icons).find(item => title === "home" ? "dashboard" : item === title) ?? "",
+      return {
+        icon: Icons?.[title],
+        title:
+          Object.keys(Icons).find((item) =>
+            title === "home" ? "dashboard" : item === title
+          ) ?? "",
         to: item?.path,
-        active: isActive(item?.path)
-      }
-    })
-  }
+        active: isActive(item?.path),
+      };
+    });
+  };
 
   const navigation: NavigationItem[] = renderNavigation();
-  
 
   const mobileSidebarCss = show
     ? "translate-x-0 absolute h-full z-50 w-80"
@@ -84,7 +92,7 @@ export const SideBar = ({ setShow, show }: sideBarProps) => {
 
   return (
     <aside
-      className={`bg-transparent transition ease-in-out duration-500 px-5 ${
+      className={`bg-transparent transition ease-in-out duration-500 px-5 flex flex-col h-full ${
         isMobile ? mobileSidebarCss : sidebarCss
       }`}
     >
@@ -104,7 +112,7 @@ export const SideBar = ({ setShow, show }: sideBarProps) => {
         </div>
       </div>
 
-      <div className="overflow-auto h-[30rem]">
+      <div className="overflow-auto flex flex-col flex-1 pb-5">
         {navigation.map((item, index) => (
           <SidebarItem
             key={index}
@@ -116,18 +124,46 @@ export const SideBar = ({ setShow, show }: sideBarProps) => {
           />
         ))}
 
+        <div className="flex-1" />
+
+        <div
+          className={`flex items-center gap-3 px-3 py-2 text-gray-600 cursor-pointer`}
+        >
+          <SidebarItemIcon icon={MdInfoOutline} />
+          <h6 className="font-medium text-sm text-gray-600">Help Center</h6>
+        </div>
+
         <ConfirmAlert
           text="Are you sure you want to log out?"
           title="Log Out"
           logout
           url=""
           trigger={
-            <div className={`flex items-center gap-3 px-3 py-2 mb-2 mt-5 `}>
+            <div
+              className={`flex items-center gap-3 px-3 py-2 mb-2 mt-2 text-gray-600`}
+            >
               <SidebarItemIcon icon={MdLogout} />
-              <h6 className="font-medium text-sm text-white">Logout</h6>
+              <h6 className="font-medium text-sm">Logout</h6>
             </div>
           }
         />
+
+        <div className="flex items-center gap-3 mb-5 pl-1 border-t pt-4">
+          <Avatar className="!bg-gray-300 text-primary h-9 w-9">
+            <AvatarImage src="" alt="" />
+            <AvatarFallback>
+              <FaUser />
+            </AvatarFallback>
+          </Avatar>
+          <div className=" flex cursor-pointer gap-2 items-center">
+              <div>
+                <p className="text-sm text-primary text-center">{`${user?.first_name} ${user?.last_name}`}</p>
+              </div>
+            {/* <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" /> */}
+          </div>
+        </div>
+
+        <div className="h-40 bg-[#9899AD] rounded-xl shadow-md" />
       </div>
     </aside>
   );
@@ -154,7 +190,7 @@ const SidebarItem = (props: SidebarItemProps) => {
       } ${props.className ?? ""}`}
     >
       <SidebarItemIcon icon={Icon} isImage={props.isImage} />
-      <h6 className="font-medium text-sm">{props.title}</h6>
+      <h6 className="font-medium text-sm capitalize">{props.title}</h6>
     </Link>
   );
 };
@@ -169,7 +205,7 @@ const SidebarItemIcon = (props: SidebarItemIconProps) => {
   return (
     <div className=" rounded-md grid place-items-center">
       {props?.isImage ? (
-        <img src={props.icon} className="h-5 w-5 text-primary" />
+        <img src={props.icon} className="h-5 w-5" />
       ) : (
         <Icon className="h-5 w-5" />
       )}

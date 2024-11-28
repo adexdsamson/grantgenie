@@ -1,42 +1,23 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* HTML: <div class="loader"></div> */
+.loader {
+  width: 70px;
+  aspect-ratio: 2;
+  background:
+    radial-gradient(farthest-side,#000 90%,#0000) 0 0/8px 8px,
+    linear-gradient(#9BA2FF 0 0) 100% 0/30px 10px,
+    linear-gradient(#9BA2FF 0 0) 0 100%/30px 10px,
+    repeating-linear-gradient(90deg,#9BA2FF 0 10px,#0000 0 30px);
+  background-repeat: no-repeat;
+  animation: l6 2s infinite;
 }
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+@keyframes l6 {
+  0%    {background-position:left 1px bottom 1px,100% 0,0 100%,0 0}
+  12.5% {background-position:left 50% bottom 1px,100% 0,0 100%,0 0}
+  25%   {background-position:left 50% top 1px,100% 0,0 100%,0 0}
+  37.5% {background-position:right 1px top 1px,100% 0,0 100%,0 0}
+  50%   {background-position:right 1px bottom 1px,0 0,100% 100%,0 0}
+  62.5% {background-position:right 50% bottom 1px,0 0,100% 100%,0 0}
+  75%   {background-position:right 50% top 1px,0 0,100% 100%,0 0}
+  87.5% {background-position:left 1px top 1px,0 0,100% 100%,0 0}
+  100%  {background-position:left 1px bottom 1px,100% 0,0 100%,0 0}
 }

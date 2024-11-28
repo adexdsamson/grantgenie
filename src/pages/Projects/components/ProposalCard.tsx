@@ -83,10 +83,15 @@ const projectTypes: ProjectTypeProps[] = [
     title: "Immigration",
     description: "Gorem ipsum dolor sit amet, consectetur adipiscing elit.",
     isSelected: false,
+    disabled: true,
   },
 ];
 
-const ProposalTypeCard = ({ status }: { status: ProposalCardProps["status"] }) => {
+const ProposalTypeCard = ({
+  status = "continue",
+}: {
+  status: ProposalCardProps["status"];
+}) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -103,7 +108,7 @@ const ProposalTypeCard = ({ status }: { status: ProposalCardProps["status"] }) =
           )}
         </Button>
       </DialogTrigger>
-      <DialogContent asChild>
+      <DialogContent className="max-w-none w-[28rem]">
         <DialogHeader>
           <DialogTitle>Create project</DialogTitle>
           <DialogDescription>
@@ -111,7 +116,7 @@ const ProposalTypeCard = ({ status }: { status: ProposalCardProps["status"] }) =
           </DialogDescription>
         </DialogHeader>
 
-        <div>
+        <div className="mt-3">
           {projectTypes.map((type, index) => (
             <div
               key={index}
@@ -129,6 +134,7 @@ const ProposalTypeCard = ({ status }: { status: ProposalCardProps["status"] }) =
 export interface ProjectTypeProps {
   icon: string;
   title: string;
+  disabled?: boolean;
   description: string;
   isSelected?: boolean;
 }
@@ -138,16 +144,19 @@ export const ProjectTypeCard: React.FC<ProjectTypeProps> = ({
   title,
   description,
   isSelected = false,
+  disabled,
+  ...rest
 }) => {
   return (
-    <article
+    <div
+      {...rest}
       role="button"
       tabIndex={0}
-      className={`flex flex-col justify-center py-3 pl-2.5 w-full bg-white rounded-xl max-w-[356px] min-h-[69px] ${
-        isSelected ? "border border-indigo-300 border-solid" : ""
-      }`}
+      className={`flex flex-col justify-center py-3 w-full bg-white rounded-xl min-h-[69px] ${
+        isSelected ? "border border-indigo-300 border-solid shadow" : ""
+      } ${disabled && "opacity-45"} `}
     >
-      <div className="flex gap-3 justify-center items-center">
+      <div className="flex gap-3 pl-3 items-center">
         <div className="flex gap-0.5 justify-center items-center self-stretch px-2 my-auto w-10 h-10 bg-slate-300 min-h-[40px] rounded-[48px]">
           <img
             loading="lazy"
@@ -156,13 +165,32 @@ export const ProjectTypeCard: React.FC<ProjectTypeProps> = ({
             className="object-contain self-stretch my-auto w-5 aspect-square"
           />
         </div>
-        <div className="flex flex-col self-stretch my-auto rounded-none min-w-[240px] w-[296px]">
+        <div className="flex flex-col self-stretch my-auto rounded-none w-[290px]">
           <h3 className="self-start text-sm font-semibold leading-none text-slate-800">
             {title}
           </h3>
           <p className="text-xs leading-4 text-slate-600">{description}</p>
         </div>
       </div>
-    </article>
+    </div>
+  );
+};
+
+export const GrantReport = () => {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <ProjectTypeCard
+          {...{
+            icon: "https://cdn.builder.io/api/v1/image/assets/TEMP/2a2328b2c77bb6d89d84dfa0f5a26ed5bee01218709024724ca49867929f2a42?placeholderIfAbsent=true&apiKey=877fbded3c1141a18415be7a6b510b08",
+            title: "Grants and Contracts",
+            description:
+              "Enhances the grant application process for startups and businesses",
+            isSelected: true,
+          }}
+        />
+      </DialogTrigger>
+      <DialogContent className="max-w-none w-[28rem]"></DialogContent>
+    </Dialog>
   );
 };

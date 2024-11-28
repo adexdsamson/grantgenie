@@ -79,10 +79,10 @@ export const CreateProjectDialog = () => {
           <Forger
             {...{
               name: "name",
-              label: "name",
+              label: "Name",
               type: "text",
               placeholder: "",
-              containerClass: "mb-3",
+              containerClass: "mb-3 mt-3",
               component: TextInput,
               helperText: "",
             }}

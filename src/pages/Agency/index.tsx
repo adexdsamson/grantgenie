@@ -1,15 +1,18 @@
-import { ApiResponse, ApiResponseError } from "@/types";
-import { useQuery } from "@tanstack/react-query";
-import { ProjectList } from "../Projects";
-import { getRequest } from "@/lib/axiosInstance";
-import { ContentHeader } from "@/components/layouts/ContentHeader";
-import { cn } from "@/lib/utils";
-import { MapList } from "@/components/layouts/MapList";
 import { EmptyPlaceholder } from "@/components/layouts/EmptyPlaceholder";
-import { EmployeeCard } from "./components/EmployeeCard";
-import { CreateEmployeeDialog } from "./components/CreateEmployee";
+import { ContentHeader } from "@/components/layouts/ContentHeader";
+import { CreateAgency } from "./components/CreateAgency";
+import { ApiResponse, ApiResponseError } from "@/types";
+import { MapList } from "@/components/layouts/MapList";
+import { useQuery } from "@tanstack/react-query";
+import { getRequest } from "@/lib/axiosInstance";
+import { ProfileCard } from "./components/Agency";
+import { AgencyType } from "./types";
+import { cn } from "@/lib/utils";
 
-const demo: ProjectList[] = [
+
+
+
+const demo: AgencyType[] = [
 //   {
 //     id: 2,
 //     user: "davidmbatuegwu@gmail.com",
@@ -22,25 +25,25 @@ const demo: ProjectList[] = [
 //   },
 ];
 
-export const Employees = () => {
+export const Agencies = () => {
 
   const { data, isPending } = useQuery<
-    ApiResponse<ProjectList[]>,
+    ApiResponse<AgencyType[]>,
     ApiResponseError
   >({
-    queryKey: ["project-lists"],
-    queryFn: () => getRequest("/grants/projects/"),
+    queryKey: ["agency-lists"],
+    queryFn: () => getRequest("/grants/agencies/"),
   });
 
   return (
     <>
       <header className="flex flex-wrap gap-10 justify-between items-start px-6 pt-11 pb-20 mt-9 w-full rounded-2xl bg-indigo-300 bg-opacity-40 min-h-[221px] max-md:px-5 max-md:max-w-full">
         <ContentHeader
-          title="Employees"
+          title="Agencies"
           description="With the information you provide, our AI crafts presentations that include essential elements like problem statements, market opportunity, competitive analysis, and revenue models.."
         />
 
-        <CreateEmployeeDialog />
+        <CreateAgency />
       </header>
       <div
         className={cn("md:grid-cols-4 grid-cols-1 gap-5 mt-5", {
@@ -50,19 +53,14 @@ export const Employees = () => {
         <MapList
           data={data?.data ?? demo}
           isLoading={isPending}
-          renderItem={(employee, index) => (
-            <EmployeeCard
-              {...employee}
+          renderItem={(agency, index) => (
+            <ProfileCard
+              {...agency}
               key={index}
-              avatarText={employee.name}
-              description={""}
-              email={employee.email}
-              imageUrl=""
-              name={employee.name}
             />
           )}
           PlaceholderComponent={CoursePlaceholder}
-          ListEmptyComponent={<EmptyPlaceholder {...{ title: "Project" }} />}
+          ListEmptyComponent={<EmptyPlaceholder {...{ title: "Agency" }} />}
         />
       </div>
     </>

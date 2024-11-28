@@ -16,9 +16,10 @@ export const authenticationPagePaths = {
 } as const
 
 export const dashboardPagePaths = {
-  Home: "../pages/DashboardPage",
+  Home: "../pages/DashboardPage/index.tsx",
   Projects: '../pages/Projects/index.tsx',
   Employees: '../pages/Employees/index.tsx',
+  Agencies: '../pages/Agency/index.tsx',
 } as const
 
 const pageRoutes = getPageRoutes(authenticationPagePaths);

@@ -7,6 +7,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 import { File, Paperclip } from "lucide-react";
 import { ReactNode } from "react";
 
@@ -48,7 +49,7 @@ export const TextInput = (props: TextInputProps) => {
     >
       <Label
         htmlFor={props.name}
-        className="flex flex-col justify-center text-sm whitespace-nowrap text-[#0F172A] font-sans"
+        className="text-sm mb-3 block whitespace-nowrap text-[#0F172A] font-sans"
       >
         {props.label}
       </Label>
@@ -61,7 +62,7 @@ export const TextInput = (props: TextInputProps) => {
       </div>
 
       <p
-        className="mt-2 text-xs text-[#64748B] font-sans"
+        className="mt-1 text-xs text-[#64748B] font-sans"
         role="alert"
         aria-live="polite"
       >
@@ -99,13 +100,10 @@ export const TextArea = (props: TextAreaProps) => {
 const FileSvgDraw = () => {
   return (
     <>
-      <File />
+      <File className="h-16 w-16 text-gray-500" />
       <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
-        <span className="font-semibold">Click to upload</span>
-        &nbsp; or drag and drop
-      </p>
-      <p className="text-xs text-gray-500 dark:text-gray-400">
-        SVG, PNG, JPG or GIF
+      Drag and Drop files here or &nbsp;
+        <span className="font-semibold underline">choose file</span>
       </p>
     </>
   );
@@ -124,10 +122,10 @@ export const TextFileUploader = (props: TextFileProps) => {
       value={props.files}
       onValueChange={(files) => props?.onChange?.(files)}
       dropzoneOptions={dropZoneConfig}
-      className="relative bg-background rounded-lg p-2"
+      className={cn("relative bg-background rounded-lg", props.containerClass)}
     >
-      <FileInput className="outline-dashed outline-1 outline-white">
-        <div className="flex items-center justify-center flex-col pt-3 pb-4 w-full ">
+      <FileInput className="outline-dashed outline-1 outline-white bg-gray-300 h-40">
+        <div className="flex items-center justify-end h-full flex-col  pb-4 w-full ">
           <FileSvgDraw />
         </div>
       </FileInput>
