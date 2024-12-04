@@ -1,5 +1,6 @@
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -14,13 +15,15 @@ import {
   TextInput,
   TextInputProps,
 } from "@/components/layouts/FormInputs/TextInput";
-import { Forger, useForge } from "@/lib/forge";
+import { Forger, FormPropsRef, useForge } from "@/lib/forge";
 import { TextSelect } from "@/components/layouts/FormInputs/TextSelect";
 import { TextArea } from "@/components/layouts/FormInputs/TextArea";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { postRequest } from "@/lib/axiosInstance";
-import { ApiResponseError } from "@/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getRequest, postRequest } from "@/lib/axiosInstance";
+import { ApiResponse, ApiResponseError } from "@/types";
 import { Button } from "@/components/ui/button";
+import { AgencyResponse } from "@/pages/Agency/types";
+import { useRef } from "react";
 
 type FormState = {
   name: string;
@@ -36,6 +39,8 @@ const schema = yup.object({
 
 export const CreateProjectDialog = () => {
   const queryClient = useQueryClient();
+  const ref = useRef<FormPropsRef | null>(null);
+  const closeRef = useRef<HTMLButtonElement | null>(null);
   const { error, success } = useToastHandlers();
 
   const { ForgeForm } = useForge<FormState, TextInputProps>({
@@ -43,20 +48,28 @@ export const CreateProjectDialog = () => {
   });
 
   const { mutateAsync, isPending } = useMutation({
-    mutationFn: async (payload: FormState) => postRequest("", payload),
+    mutationFn: async (payload: FormState) => postRequest("grants/projects/", payload),
   });
 
+  const agencyQuery = useQuery<ApiResponse<AgencyResponse[]>, ApiResponseError>(
+    {
+      queryKey: ["agency-lists"],
+      queryFn: async () => await getRequest("grants/agencies/"),
+    }
+  );
+
   const handleSubmit = async (data: FormState) => {
-    const Toast_Title = "";
+    const Toast_Title = "Project";
     try {
       const result = await mutateAsync(data);
-      console.log(result);
 
-      // if(result.data)
+      if (!result.data) {
+        return;
+      }
 
+      closeRef.current?.click()
       queryClient.invalidateQueries({ queryKey: ["project-lists"] });
-
-      success(Toast_Title, "");
+      success(Toast_Title, "Project created successfully");
     } catch (err) {
       error(Toast_Title, err as ApiResponseError);
     }
@@ -65,10 +78,10 @@ export const CreateProjectDialog = () => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Create new proposal</Button>
+        <Button>Create project</Button>
       </DialogTrigger>
-      <DialogContent >
-        <ForgeForm onSubmit={handleSubmit}>
+      <DialogContent>
+        <ForgeForm ref={ref} onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Create project</DialogTitle>
             <DialogDescription>
@@ -95,7 +108,10 @@ export const CreateProjectDialog = () => {
               placeholder: "",
               containerClass: "mb-3",
               component: TextSelect,
-              options: [],
+              options: agencyQuery.data?.data?.map?.((item) => ({
+                label: item.full_agency_name,
+                value: item.uuid,
+              })),
               helperText: "",
             }}
           />
@@ -105,15 +121,20 @@ export const CreateProjectDialog = () => {
               name: "description",
               label: "Description",
               placeholder: "",
-              containerClass: "mb-3",
+              containerClass: "my-3",
               component: TextArea,
               helperText: "",
             }}
           />
 
           <DialogFooter>
-            <Button variant={"ghost"}>Cancel</Button>
-            <Button type="submit" isLoading={isPending}>
+            <DialogClose ref={closeRef} asChild>
+              <Button variant={"ghost"}>Cancel</Button>
+            </DialogClose>
+            <Button
+              onClick={() => ref.current?.onSubmit()}
+              isLoading={isPending}
+            >
               Create
             </Button>
           </DialogFooter>
