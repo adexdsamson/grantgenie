@@ -4,6 +4,7 @@ import { StatCard } from "./components/StatsCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRef } from "react";
 import { useResizeObserver } from "usehooks-ts";
+import { useToken } from "@/store/authSlice";
 
 const statsData = [
   {
@@ -29,6 +30,7 @@ const statsData = [
 ];
 
 export const Home = () => {
+  const token = useToken()
   const ref = useRef<HTMLDivElement>(null);
 
   const { width = 0, height = 0 } = useResizeObserver({
@@ -36,7 +38,7 @@ export const Home = () => {
     box: "border-box",
   });
 
-  console.log({ width });
+  console.log({ token });
 
   return (
     <>

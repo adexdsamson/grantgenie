@@ -12,31 +12,34 @@ import { useToastHandlers } from "@/hooks/useToaster";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import {
-  TextFileUploader,
   TextInput,
   TextInputProps,
 } from "@/components/layouts/FormInputs/TextInput";
-import { Forger, useForge } from "@/lib/forge";
-import { TextSelect } from "@/components/layouts/FormInputs/TextSelect";
+import { Forger, useForge, FormPropsRef } from "@/lib/forge";
 import { TextArea } from "@/components/layouts/FormInputs/TextArea";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { postRequest } from "@/lib/axiosInstance";
 import { ApiResponseError } from "@/types";
 import { Button } from "@/components/ui/button";
+import { useRef } from "react";
 
 type FormState = {
-  name: string;
-  agency: string;
+  full_agency_name: string;
+  website_link: string;
+  requirements: string;
   description: string;
 };
 
 const schema = yup.object({
-  name: yup.string().required(),
-  agency: yup.string().required(),
+  full_agency_name: yup.string().required(),
+  website_link: yup.string().required(),
+  requirements: yup.string().required(),
   description: yup.string().required(),
 });
 
 export const CreateAgency = () => {
+  const ref = useRef<FormPropsRef | null>(null);
+  const closeRef = useRef<HTMLButtonElement | null>(null);
   const queryClient = useQueryClient();
   const { error, success } = useToastHandlers();
 
@@ -46,21 +49,22 @@ export const CreateAgency = () => {
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (payload: FormState) =>
-      postRequest("/grants/agencies/", payload),
+      await postRequest("grants/agencies/", payload),
   });
 
   const handleSubmit = async (data: FormState) => {
-    const Toast_Title = "";
+    const Toast_Title = "Agency Creation";
     try {
-      // const formData =
       const result = await mutateAsync(data);
-      console.log(result);
 
-      // if(result.data)
+      if(!result.data){
+        return 
+      }
 
-      queryClient.invalidateQueries({ queryKey: ["project-lists"] });
+      queryClient.invalidateQueries({ queryKey: ["agency-lists"] });
 
-      success(Toast_Title, "");
+      success(Toast_Title, "Created Successfully");
+
     } catch (err) {
       error(Toast_Title, err as ApiResponseError);
     }
@@ -71,8 +75,9 @@ export const CreateAgency = () => {
       <DialogTrigger asChild>
         <Button>Add Agency</Button>
       </DialogTrigger>
+
       <DialogContent>
-        <ForgeForm onSubmit={handleSubmit}>
+        <ForgeForm ref={ref} onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Add Agency</DialogTitle>
             <DialogDescription>
@@ -82,43 +87,59 @@ export const CreateAgency = () => {
 
           <Forger
             {...{
-              name: "name",
-              label: "Full Name",
+              name: "full_agency_name",
               type: "text",
-              placeholder: "Employee",
+              label: "Name",
+              component: TextInput,
+              placeholder: "",
               containerClass: "mb-5 mt-5",
-              component: TextInput,
-              helperText: "Enter your employee full name",
+              helperText: "Enter your agency's Name",
             }}
           />
 
           <Forger
             {...{
-              name: "email",
-              label: "Email Address",
+              type: "url",
               placeholder: "",
+              name: "website_link",
+              component: TextInput,
               containerClass: "mb-5",
-              component: TextInput,
-              type: "email",
-              helperText: "Enter your employee’s email address",
+              label: "Website Link",
+              helperText: "Enter the agency's website url",
             }}
           />
 
           <Forger
             {...{
-              name: "cv_link",
+              type: "text",
               placeholder: "",
-              containerClass: "mb-8",
-              component: TextFileUploader,
+              name: "requirements",
+              component: TextArea,
+              containerClass: "mb-5",
+              label: "Requirements",
+              helperText: "Enter the agency's website url",
+            }}
+          />
+
+          <Forger
+            {...{
               helperText: "",
+              placeholder: "",
+              component: TextArea,
+              name: "description",
+              label: "Description",
+              containerClass: "mb-8",
             }}
           />
 
           <DialogFooter>
-            <DialogClose asChild>
+            <DialogClose ref={closeRef} asChild>
               <Button variant={"ghost"}>Cancel</Button>
             </DialogClose>
-            <Button type="submit" isLoading={isPending}>
+            <Button
+              onClick={() => ref.current?.onSubmit()}
+              isLoading={isPending}
+            >
               Add
             </Button>
           </DialogFooter>

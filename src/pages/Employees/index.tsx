@@ -1,6 +1,5 @@
-import { ApiResponse, ApiResponseError } from "@/types";
+import { ApiResponse, ApiResponseError, EmployeeListResponse } from "@/types";
 import { useQuery } from "@tanstack/react-query";
-import { ProjectList } from "../Projects";
 import { getRequest } from "@/lib/axiosInstance";
 import { ContentHeader } from "@/components/layouts/ContentHeader";
 import { cn } from "@/lib/utils";
@@ -9,27 +8,14 @@ import { EmptyPlaceholder } from "@/components/layouts/EmptyPlaceholder";
 import { EmployeeCard } from "./components/EmployeeCard";
 import { CreateEmployeeDialog } from "./components/CreateEmployee";
 
-const demo: ProjectList[] = [
-//   {
-//     id: 2,
-//     user: "davidmbatuegwu@gmail.com",
-//     name: "My name",
-//     email: "autogon@gmail.com",
-//     cv_link: "https://storage.com",
-//     created_at: "2024-11-21T08:44:07.425905Z",
-//     updated_at: "2024-11-21T08:44:07.425940Z",
-//     is_deleted: false,
-//   },
-];
 
 export const Employees = () => {
-
   const { data, isPending } = useQuery<
-    ApiResponse<ProjectList[]>,
+    ApiResponse<EmployeeListResponse[]>,
     ApiResponseError
   >({
-    queryKey: ["project-lists"],
-    queryFn: () => getRequest("/grants/projects/"),
+    queryKey: ["employee-lists"],
+    queryFn: async () => await getRequest("grants/employees/"),
   });
 
   return (
@@ -48,17 +34,17 @@ export const Employees = () => {
         })}
       >
         <MapList
-          data={data?.data ?? demo}
           isLoading={isPending}
+          data={data?.data ?? []}
           renderItem={(employee, index) => (
             <EmployeeCard
+              imageUrl=""
               {...employee}
               key={index}
-              avatarText={employee.name}
               description={""}
-              email={employee.email}
-              imageUrl=""
               name={employee.name}
+              email={employee.email}
+              avatarText={employee.name}
             />
           )}
           PlaceholderComponent={CoursePlaceholder}

@@ -61,3 +61,14 @@ export const deleteRequest = async <T = unknown>(url: string, payload?: T) => {
   const res = await getAxiosInstance().delete(`${url}`, { data: payload });
   return res;
 };
+
+export const fileUploadRequest = async <T = unknown>(
+  url: string,
+  payload: T,
+  config?: AxiosRequestConfig
+) => {
+  const res = await getAxiosInstance().post(url, payload, {
+      ...config, headers: { ...config?.headers, "Content-Type": "multipart/form-data" }
+  });
+  return res;
+};

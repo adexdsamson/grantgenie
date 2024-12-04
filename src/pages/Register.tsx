@@ -4,57 +4,74 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import {
   TextInput,
   TextInputProps,
+  TextPassword,
 } from "@/components/layouts/FormInputs/TextInput";
 import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
 import { postRequest } from "@/lib/axiosInstance";
 import { useToastHandlers } from "@/hooks/useToaster";
-import { ApiResponseError } from "@/types";
-import { Link } from "react-router-dom";
+import { ApiResponse, ApiResponseError, AuthResponse } from "@/types";
+import { Link, useNavigate } from "react-router-dom";
+import { useSetToken, useSetUser } from "@/store/authSlice";
 
 type FormState = {
-  name: string;
+  first_name: string;
+  last_name: string;
   email: string;
   phone: string;
   company: string;
   companyEmail: string;
   password: string;
-  confirmPAssword: string;
+  confirmPassword: string;
 };
 
 const schema = yup.object({
-  name: yup.string().required(),
-  email: yup.string().required(),
+  first_name: yup.string().required(),
+  last_name: yup.string().required(),
+  email: yup.string().email().trim().required(),
   phone: yup.string().required(),
   company: yup.string().required(),
   companyEmail: yup.string().required(),
   password: yup.string().required(),
-  confirmPAssword: yup
+  confirmPassword: yup
     .string()
     .oneOf([yup.ref("password"), undefined], "Passwords must match")
     .required(),
 });
 
+
+
 export const Index = () => {
+  const navigate = useNavigate()
+  const setUser = useSetUser()
+  const setToken = useSetToken()
   const { error, success } = useToastHandlers();
+
   const { ForgeForm } = useForge<FormState, TextInputProps>({
     resolver: yupResolver(schema),
   });
 
-  const { mutateAsync, isPending,  } = useMutation({
-    mutationFn: async (payload: FormState) => postRequest("", payload),
+  const { mutateAsync, isPending } = useMutation<ApiResponse<AuthResponse>, ApiResponseError, FormState>({
+    mutationFn: async (payload: FormState) =>
+      await postRequest("auth/register/", payload),
   });
 
   const handleSubmit = async (data: FormState) => {
-    const Toast_Title = ""
+    const Toast_Title = "";
     try {
-        const result = await mutateAsync(data);
+      const result = await mutateAsync(data);
 
-        // if(result.data)
+      if(!result.data){
+        return
+      }
 
-        success(Toast_Title, "")
+      setUser(result.data.user);
+      setToken(result.data.access_token)
+      success(Toast_Title, "Account created");
+      navigate("/dashboard")
+      // navigate("/verification")
     } catch (err) {
-        error(Toast_Title, err as ApiResponseError)
+      error(Toast_Title, err as ApiResponseError);
     }
   };
 
@@ -72,16 +89,29 @@ export const Index = () => {
 
       <div className="mt-16">
         <ForgeForm onSubmit={handleSubmit}>
-          <Forger
-            {...{
-              name: "name",
-              label: "Full Name",
-              placeholder: "Name",
-              component: TextInput,
-              containerClass: "mb-5",
-              helperText: "Enter your full name",
-            }}
-          />
+          <div className="flex items-center gap-4 mb-10">
+            <Forger
+              {...{
+                name: "first_name",
+                label: "First Name",
+                placeholder: "Name",
+                component: TextInput,
+                containerClass: "mb-5",
+                helperText: "Enter your full name",
+              }}
+            />
+
+            <Forger
+              {...{
+                name: "last_name",
+                label: "Last Name",
+                placeholder: "Name",
+                component: TextInput,
+                containerClass: "mb-5",
+                helperText: "Enter your full name",
+              }}
+            />
+          </div>
 
           <div className="flex items-center gap-4 mb-10">
             <Forger
@@ -139,7 +169,7 @@ export const Index = () => {
                 label: "Password",
                 type: "password",
                 placeholder: "Password",
-                component: TextInput,
+                component: TextPassword,
                 containerClass: "",
                 helperText: "Enter a secure 8 character password",
               }}
@@ -150,16 +180,17 @@ export const Index = () => {
                 label: "Confirm Password",
                 type: "password",
                 placeholder: "Password",
-                component: TextInput,
+                component: TextPassword,
                 helperText: "Enter a secure 8 character password",
               }}
             />
           </div>
+          <div className="flex justify-end mt-5">
+            <Button isLoading={isPending} type="submit" className="px-20">
+              Register
+            </Button>
+          </div>
         </ForgeForm>
-
-        <div className="flex justify-end mt-5">
-          <Button isLoading={isPending} className="px-20">Register</Button>
-        </div>
       </div>
     </section>
   );

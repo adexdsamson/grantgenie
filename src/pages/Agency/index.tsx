@@ -6,33 +6,16 @@ import { MapList } from "@/components/layouts/MapList";
 import { useQuery } from "@tanstack/react-query";
 import { getRequest } from "@/lib/axiosInstance";
 import { ProfileCard } from "./components/Agency";
-import { AgencyType } from "./types";
+import { AgencyResponse } from "./types";
 import { cn } from "@/lib/utils";
 
-
-
-
-const demo: AgencyType[] = [
-//   {
-//     id: 2,
-//     user: "davidmbatuegwu@gmail.com",
-//     name: "My name",
-//     email: "autogon@gmail.com",
-//     cv_link: "https://storage.com",
-//     created_at: "2024-11-21T08:44:07.425905Z",
-//     updated_at: "2024-11-21T08:44:07.425940Z",
-//     is_deleted: false,
-//   },
-];
-
 export const Agencies = () => {
-
   const { data, isPending } = useQuery<
-    ApiResponse<AgencyType[]>,
+    ApiResponse<AgencyResponse[]>,
     ApiResponseError
   >({
     queryKey: ["agency-lists"],
-    queryFn: () => getRequest("/grants/agencies/"),
+    queryFn: async () => await getRequest("grants/agencies/"),
   });
 
   return (
@@ -51,11 +34,12 @@ export const Agencies = () => {
         })}
       >
         <MapList
-          data={data?.data ?? demo}
+          data={data?.data ?? []}
           isLoading={isPending}
           renderItem={(agency, index) => (
             <ProfileCard
-              {...agency}
+              imageUrl={agency.website_link}
+              name={agency.full_agency_name}
               key={index}
             />
           )}

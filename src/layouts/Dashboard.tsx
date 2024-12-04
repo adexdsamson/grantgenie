@@ -1,13 +1,13 @@
 import Container from "@/components/layouts/Container";
-import { Outlet } from "react-router-dom";
 import { SideBar } from "./Sidebar";
 import { Header } from "./Header";
 import { useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
 
-export const Dashboard = () => {
+export const Dashboard = (props: { children: JSX.Element }) => {
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [show, setShow] = useState<boolean>(isMobile ? false : true);
+  
 
   return (
     <Container
@@ -26,7 +26,7 @@ export const Dashboard = () => {
         <Header show={show} setShow={setShow} title="Dashboard" />
 
         <Container>
-          <Outlet />
+          {props.children}
         </Container>
       </Container>
     </Container>

@@ -16,55 +16,74 @@ import {
   TextInput,
   TextInputProps,
 } from "@/components/layouts/FormInputs/TextInput";
-import { Forger, useForge } from "@/lib/forge";
-import { TextSelect } from "@/components/layouts/FormInputs/TextSelect";
-import { TextArea } from "@/components/layouts/FormInputs/TextArea";
+import { Forger, FormPropsRef, useForge } from "@/lib/forge";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { postRequest } from "@/lib/axiosInstance";
+import { fileUploadRequest } from "@/lib/axiosInstance";
 import { ApiResponseError } from "@/types";
 import { Button } from "@/components/ui/button";
+import {
+  checkIfFilesAreCorrectType,
+  checkIfFilesAreTooBig,
+  createFormData,
+} from "@/lib/utils";
+import { useRef } from "react";
 
 type FormState = {
   name: string;
-  agency: string;
-  description: string;
+  email: string;
+  cv_file: File[];
 };
-
-//      "name": "My name",
-// "email": "autogon@gmail.com",
-// "cv_link": "https://storage.com"
 
 const schema = yup.object({
   name: yup.string().required(),
-  agency: yup.string().required(),
-  description: yup.string().required(),
+  email: yup.string().email().required(),
+  cv_file: yup
+    .array()
+    .nullable()
+    .required("VALIDATION_FIELD_REQUIRED")
+    .test(
+      "is-big-file",
+      "The file size exceeds the maximum allowed size of 2MB.",
+      checkIfFilesAreTooBig
+    )
+    .test(
+      "is-correct-file",
+      "VALIDATION_FIELD_FILE_WRONG_TYPE",
+      checkIfFilesAreCorrectType
+    )
+    .required(),
 });
 
 export const CreateEmployeeDialog = () => {
   const queryClient = useQueryClient();
+  const ref = useRef<FormPropsRef | null>(null);
   const { error, success } = useToastHandlers();
+  const closeRef = useRef<HTMLButtonElement | null>(null);
 
   const { ForgeForm } = useForge<FormState, TextInputProps>({
     resolver: yupResolver(schema),
   });
 
   const { mutateAsync, isPending } = useMutation({
-    mutationFn: async (payload: FormState) =>
-      postRequest("/grants/employees/", payload),
+    mutationFn: async (payload: FormData) =>
+      await fileUploadRequest("grants/employees/", payload),
   });
 
   const handleSubmit = async (data: FormState) => {
-    const Toast_Title = "";
+    const Toast_Title = "Employee";
     try {
-      // const formData =
-      const result = await mutateAsync(data);
+      const formData = createFormData({ ...data, cv_file: data.cv_file[0] });
+
+      const result = await mutateAsync(formData);
       console.log(result);
 
-      // if(result.data)
+      if (!result.data) {
+        return;
+      }
 
-      queryClient.invalidateQueries({ queryKey: ["project-lists"] });
-
-      success(Toast_Title, "");
+      closeRef.current?.click?.();
+      queryClient.invalidateQueries({ queryKey: ["employee-lists"] });
+      success(Toast_Title, "Employee's record created successfully");
     } catch (err) {
       error(Toast_Title, err as ApiResponseError);
     }
@@ -76,7 +95,7 @@ export const CreateEmployeeDialog = () => {
         <Button>Add Employee</Button>
       </DialogTrigger>
       <DialogContent>
-        <ForgeForm onSubmit={handleSubmit}>
+        <ForgeForm ref={ref} onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Add employee details</DialogTitle>
             <DialogDescription>
@@ -87,11 +106,11 @@ export const CreateEmployeeDialog = () => {
           <Forger
             {...{
               name: "name",
-              label: "Full Name",
               type: "text",
+              label: "Full Name",
+              component: TextInput,
               placeholder: "Employee",
               containerClass: "mb-5 mt-5",
-              component: TextInput,
               helperText: "Enter your employee full name",
             }}
           />
@@ -99,18 +118,18 @@ export const CreateEmployeeDialog = () => {
           <Forger
             {...{
               name: "email",
-              label: "Email Address",
-              placeholder: "",
-              containerClass: "mb-5",
-              component: TextInput,
               type: "email",
+              placeholder: "",
+              component: TextInput,
+              label: "Email Address",
+              containerClass: "mb-5",
               helperText: "Enter your employee’s email address",
             }}
           />
 
           <Forger
             {...{
-              name: "cv_link",
+              name: "cv_file",
               placeholder: "",
               containerClass: "mb-8",
               component: TextFileUploader,
@@ -119,10 +138,13 @@ export const CreateEmployeeDialog = () => {
           />
 
           <DialogFooter>
-            <DialogClose asChild>
+            <DialogClose ref={closeRef} asChild>
               <Button variant={"ghost"}>Cancel</Button>
             </DialogClose>
-            <Button type="submit" isLoading={isPending}>
+            <Button
+              onClick={() => ref.current?.onSubmit()}
+              isLoading={isPending}
+            >
               Add
             </Button>
           </DialogFooter>

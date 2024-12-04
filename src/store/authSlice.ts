@@ -7,7 +7,7 @@ import {
   ZustandFuncSelectors,
 } from "auto-zustand-selectors-hook";
 import { User } from "../types";
-import { getDemoToken, getDemoUser } from "@/demo";
+// import { getDemoToken, getDemoUser } from "@/demo";
 
 type InitialState = {
   user: User | null;
@@ -25,8 +25,8 @@ type Actions = {
 };
 
 const initialState: InitialState = {
-  user: getDemoUser(),
-  token: getDemoToken(),
+  user: null,
+  token: null,
   refresh: null,
   authorities: [],
 };
@@ -43,17 +43,17 @@ const reducer = combine(initialState, (set) => ({
   },
 }));
 
-// const logger = (config) => (set, get, api) => {
-//   return config(
-//     (args) => {
-//       // console.log("studio  applying", args);
-//       set(args);
-//       // console.log("studio  new state", get());
-//     },
-//     get,
-//     api
-//   );
-// };
+const logger = (config: any) => (set: any, get: any, api: any) => {
+  return config(
+    (args: any) => {
+      console.log("studio  applying", args);
+      set(args);
+      console.log("studio  new state", get());
+    },
+    get,
+    api
+  );
+};
 
 type Selectors = InitialState & Actions;
 
@@ -61,7 +61,8 @@ const persistConfig: PersistOptions<Selectors> = {
   name: "auth",
 };
 
-const baseReducer = create(persist(reducer, persistConfig));
+const baseReducer = create(logger(reducer));
+// const baseReducer = create(persist(reducer, persistConfig));
 
 export const {
   useUser,

@@ -9,34 +9,38 @@ import { getPageRoutes } from "@/helpers";
 
 export const authenticationPagePaths = {
   Index: "../pages/Register.tsx",
-  Login: '../pages/Login',
+  Login: "../pages/Login",
   Verification: "../pages/Verification.tsx",
   ForgotPassword: "../pages/ForgotPassword.tsx",
-
-} as const
+} as const;
 
 export const dashboardPagePaths = {
   Home: "../pages/DashboardPage/index.tsx",
-  Projects: '../pages/Projects/index.tsx',
-  Employees: '../pages/Employees/index.tsx',
-  Agencies: '../pages/Agency/index.tsx',
-} as const
+  Projects: "../pages/Projects/index.tsx",
+  Employees: "../pages/Employees/index.tsx",
+  Agencies: "../pages/Agency/index.tsx",
+} as const;
 
 const pageRoutes = getPageRoutes(authenticationPagePaths);
-export const dashboardPageRoutes = getPageRoutes(dashboardPagePaths, "dashboard");
+export const dashboardPageRoutes = getPageRoutes(
+  dashboardPagePaths,
+  "dashboard"
+);
 
 export const routes = (
   <>
     <Route
       path="/"
-      element={<AuthLayout />}
-      errorElement={<NotFound></NotFound>}
+      element={
+        <PublicRoute />
+      }
+      errorElement={<NotFound />}
     >
       {pageRoutes.map((item, index) => (
         <Route
           key={index}
           path={item.path}
-          element={<PublicRoute key={index}>{item.element}</PublicRoute>}
+          element={<AuthLayout key={index} >{item.element}</AuthLayout>}
         />
       ))}
     </Route>
@@ -44,7 +48,9 @@ export const routes = (
     <Route
       path="/dashboard"
       errorElement={<ErrorFallback />}
-      element={<Dashboard />}
+      element={
+        <ProtectedRoute />
+      }
     >
       {dashboardPageRoutes.map(
         (item, index) => (
@@ -52,7 +58,7 @@ export const routes = (
             key={index}
             path={item.path}
             element={
-              <ProtectedRoute key={index}>{item.element}</ProtectedRoute>
+              <Dashboard key={index}>{item.element}</Dashboard>
             }
           />
         )

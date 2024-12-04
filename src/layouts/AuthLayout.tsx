@@ -1,10 +1,10 @@
 import Container from "@/components/layouts/Container";
-import { Outlet } from "react-router-dom";
 import GrantGenieLogo from "@/assets/GrantGenie Logo.svg";
 import BusinessMan from "@/assets/businessMan.png";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ReactNode } from "react";
 
-export const AuthLayout = () => {
+export const AuthLayout = (props: { children: ReactNode }) => {
   return (
     <Container
       noGutter
@@ -36,7 +36,7 @@ export const AuthLayout = () => {
         <section className="flex flex-1 h-full max-md:ml-0 max-md:w-full">
           <ScrollArea className="w-full">
             <Container className="w-full">
-              <Outlet />
+              {props.children}
             </Container>
           </ScrollArea>
         </section>

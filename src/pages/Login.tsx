@@ -4,12 +4,15 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import {
   TextInput,
   TextInputProps,
+  TextPassword,
 } from "@/components/layouts/FormInputs/TextInput";
 import { useToastHandlers } from "@/hooks/useToaster";
 import { useMutation } from "@tanstack/react-query";
 import { postRequest } from "@/lib/axiosInstance";
-import { ApiResponseError } from "@/types";
+import { ApiResponse, ApiResponseError, AuthResponse } from "@/types";
 import { Button } from "@/components/ui/button";
+import { useSetToken, useSetUser } from "@/store/authSlice";
+import { useNavigate } from "react-router-dom";
 
 type FormState = {
   email: string;
@@ -22,23 +25,33 @@ const schema = yup.object({
 });
 
 export const Login = () => {
+  const setUser = useSetUser()
+  const setToken = useSetToken()
+  const navigate = useNavigate()
   const { error, success } = useToastHandlers();
+
   const { ForgeForm } = useForge<FormState, TextInputProps>({
     resolver: yupResolver(schema),
   });
 
-  const { mutateAsync, isPending } = useMutation({
-    mutationFn: async (payload: FormState) => postRequest("", payload),
+  const { mutateAsync, isPending } = useMutation<ApiResponse<AuthResponse>, ApiResponseError, FormState>({
+    mutationFn: async (payload: FormState) => postRequest("auth/login/", payload),
   });
 
   const handleSubmit = async (data: FormState) => {
-    const Toast_Title = "";
+    const Toast_Title = "Account Authentication";
     try {
       const result = await mutateAsync(data);
+      
+      if(!result.data){
+        return
+      }
 
-      // if(result.data)
+      setUser(result.data.user);
+      setToken(result.data.access_token)
+      success(Toast_Title, "Account created");
 
-      success(Toast_Title, "");
+      navigate("/dashboard")
     } catch (err) {
       error(Toast_Title, err as ApiResponseError);
     }
@@ -51,7 +64,7 @@ export const Login = () => {
       </h1>
       <p className="mt-3 text-base font-sans font-normal leading-7">
         Don't have an account?{" "}
-        <a href="/login" className="text-indigo-300  font-bold">
+        <a href="/" className="text-indigo-300  font-bold">
           Create account
         </a>
       </p>
@@ -76,18 +89,18 @@ export const Login = () => {
               label: "Password",
               type: "password",
               placeholder: "Password",
-              component: TextInput,
+              component: TextPassword,
               containerClass: "mt-5",
               helperText: "Enter a secure 8 character password",
             }}
           />
-        </ForgeForm>
-
         <div className="flex justify-end mt-5">
-          <Button isLoading={isPending} className="px-20">
+          <Button isLoading={isPending} type="submit" className="px-20">
             Login
           </Button>
         </div>
+        </ForgeForm>
+
       </div>
     </section>
   );

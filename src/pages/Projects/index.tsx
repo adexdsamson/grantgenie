@@ -12,18 +12,6 @@ import { cn } from "@/lib/utils";
 import { ProposalCard } from "./components/ProposalCard";
 import { truncate } from "lodash";
 
-const demo: ProjectList[] = [
-  {
-    id: 2,
-    user: "davidmbatuegwu@gmail.com",
-    name: "My name",
-    email: "autogon@gmail.com",
-    cv_link: "https://storage.com",
-    created_at: "2024-11-21T08:44:07.425905Z",
-    updated_at: "2024-11-21T08:44:07.425940Z",
-    is_deleted: false,
-  },
-];
 
 export interface ProjectList {
   id: number;
@@ -44,7 +32,7 @@ export const Projects = () => {
     ApiResponseError
   >({
     queryKey: ["project-lists"],
-    queryFn: () => getRequest("/grants/projects/"),
+    queryFn: async () => await getRequest("grants/projects/"),
   });
 
   return (
@@ -59,11 +47,11 @@ export const Projects = () => {
       </header>
       <div
         className={cn("md:grid-cols-4 grid-cols-1 gap-5 mt-5", {
-          grid: ((data?.data ?? demo).length ?? 0 >= 1) || isPending,
+          grid: (data?.data.length ?? 0 >= 1) || isPending,
         })}
       >
         <MapList
-          data={data?.data ?? demo}
+          data={data?.data ?? []}
           isLoading={isPending}
           renderItem={(project, index) => (
             <ProposalCard

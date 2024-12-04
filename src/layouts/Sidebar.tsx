@@ -152,13 +152,13 @@ export const SideBar = ({ setShow, show }: sideBarProps) => {
           <Avatar className="!bg-gray-300 text-primary h-9 w-9">
             <AvatarImage src="" alt="" />
             <AvatarFallback>
-              <FaUser />
+              <FaUser className="h-4 w-4" />
             </AvatarFallback>
           </Avatar>
           <div className=" flex cursor-pointer gap-2 items-center">
-              <div>
-                <p className="text-sm text-primary text-center">{`${user?.first_name} ${user?.last_name}`}</p>
-              </div>
+            <div>
+              <p className="text-sm text-primary text-center">{`${user?.first_name} ${user?.last_name}`}</p>
+            </div>
             {/* <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" /> */}
           </div>
         </div>
