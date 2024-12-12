@@ -165,7 +165,7 @@ export const useForge = <
       );
 
       const renderFieldProps = hasFieldProps
-        ? fieldProps.map((inputs, index) => <Forger key={index} {...inputs} />)
+        ? fieldProps.map((inputs, index) => <Forger key={index} {...inputs as any} />)
         : null;
 
       return (
