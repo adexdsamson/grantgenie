@@ -1,5 +1,5 @@
 import { getRequest } from "@/lib/axiosInstance";
-import { ApiResponse, ApiResponseError, EmployeeListResponse } from "@/types";
+import { ApiResponse, ApiResponseError } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { CreateProjectDialog } from "./components/CreateProject";
@@ -33,15 +33,6 @@ export const Projects = () => {
     queryKey: ["project-lists"],
     queryFn: async () => await getRequest("grants/projects/"),
   });
-
-  const employeeQuery = useQuery<
-    ApiResponse<EmployeeListResponse[]>,
-    ApiResponseError
-  >({
-    queryKey: ["employee-lists"],
-    queryFn: async () => await getRequest("grants/employees/"),
-  });
-
 
 
   return (

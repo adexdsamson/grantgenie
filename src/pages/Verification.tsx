@@ -33,6 +33,8 @@ import {
       const Toast_Title = "";
       try {
         const result = await mutateAsync(data);
+        console.log(result);
+        
   
         // if(result.data)
   
