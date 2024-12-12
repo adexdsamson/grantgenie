@@ -14,14 +14,14 @@ type MapListType<T = unknown> = {
 
 export const MapList =<T extends unknown = unknown> (props: MapListType<T>) => {
     const {
-        virtualize,
+        // virtualize,
         renderItem,
         data,
-        className,
+        // className,
         ListEmptyComponent,
         PlaceholderComponent,
         isLoading,
-        getItemLayout
+        // getItemLayout
     } = props;
 
     // if (virtualize && getItemLayout) {
@@ -49,7 +49,7 @@ export const MapList =<T extends unknown = unknown> (props: MapListType<T>) => {
     )
 }
 
-type ListVirtualizedType<T = unknown> = Required<Omit<MapListType<T>, "virtualize" | "ListEmptyComponent" | "PlaceholderComponent"| "isLoading">> & Omit<MapListType, "virtualize" | "data" | "getItemLayout" | "renderItem">
+// type ListVirtualizedType<T = unknown> = Required<Omit<MapListType<T>, "virtualize" | "ListEmptyComponent" | "PlaceholderComponent"| "isLoading">> & Omit<MapListType, "virtualize" | "data" | "getItemLayout" | "renderItem">
 
 // const ListVirtualized =<T extends unknown = unknown> (props: ListVirtualizedType<T>) => {
 //     const { data, renderItem, getItemLayout, className, ListEmptyComponent, PlaceholderComponent, isLoading } = props;

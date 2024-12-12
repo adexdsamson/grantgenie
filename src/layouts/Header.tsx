@@ -2,16 +2,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useToastHandlers } from "@/hooks/useToaster";
-import { useSetReset, useUser } from "@/store/authSlice";
-import { ApiResponseError } from "@/types";
-import { SearchIcon, Sidebar } from "lucide-react";
+// import { useToastHandlers } from "@/hooks/useToaster";
+import { useUser } from "@/store/authSlice";
+// import { ApiResponseError } from "@/types";
+import { Sidebar } from "lucide-react";
 import { FaUser } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import { useMediaQuery } from "usehooks-ts";
 
 type HeaderProps = {
@@ -21,7 +19,7 @@ type HeaderProps = {
 };
 
 export const Header = (props: HeaderProps) => {
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  // const isMobile = useMediaQuery("(max-width: 768px)");
   const toggleSidebar = () => {
     props.setShow(!props.show);
   };
@@ -50,18 +48,18 @@ export const Header = (props: HeaderProps) => {
   );
 };
 
-const SearchComponent = () => {
-  return (
-    <div className="relative">
-      <div className="rounded-lg w-80 h-9 bg-accent relative">
-        <input className="w-full h-full px-2 bg-transparent" />
-        <div className="h-7 w-7 rounded-full bg-primary grid place-items-center absolute top-1 right-3">
-          <SearchIcon className="text-white h-3 w-3" />
-        </div>
-      </div>
-    </div>
-  );
-};
+// const SearchComponent = () => {
+//   return (
+//     <div className="relative">
+//       <div className="rounded-lg w-80 h-9 bg-accent relative">
+//         <input className="w-full h-full px-2 bg-transparent" />
+//         <div className="h-7 w-7 rounded-full bg-primary grid place-items-center absolute top-1 right-3">
+//           <SearchIcon className="text-white h-3 w-3" />
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
 
 type ToggleButtonProps = {
   toggleSidebar: () => void;
@@ -77,21 +75,21 @@ const ToggleButton = ({ toggleSidebar }: ToggleButtonProps) => {
 
 export function DropdownMenuDemo() {
   const user = useUser();
-  const onResetState = useSetReset();
-  const toastHandler = useToastHandlers();
+  // const onResetState = useSetReset();
+  // const toastHandler = useToastHandlers();
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const matches = useMediaQuery("(min-width: 768px)");
 
-  const handleLogOut = async () => {
-    const TOAST_TITTLE = "Account Access";
-    try {
-      onResetState();
-      navigate("/");
-    } catch (error) {
-      toastHandler.error(TOAST_TITTLE, error as ApiResponseError);
-    }
-  };
+  // const handleLogOut = async () => {
+  //   const TOAST_TITTLE = "Account Access";
+  //   try {
+  //     onResetState();
+  //     navigate("/");
+  //   } catch (error) {
+  //     toastHandler.error(TOAST_TITTLE, error as ApiResponseError);
+  //   }
+  // };
 
   return (
     <DropdownMenu>

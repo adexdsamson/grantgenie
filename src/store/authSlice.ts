@@ -43,17 +43,17 @@ const reducer = combine(initialState, (set) => ({
   },
 }));
 
-const logger = (config: any) => (set: any, get: any, api: any) => {
-  return config(
-    (args: any) => {
-      console.log("studio  applying", args);
-      set(args);
-      console.log("studio  new state", get());
-    },
-    get,
-    api
-  );
-};
+// const logger = (config: any) => (set: any, get: any, api: any) => {
+//   return config(
+//     (args: any) => {
+//       console.log("studio  applying", args);
+//       set(args);
+//       console.log("studio  new state", get());
+//     },
+//     get,
+//     api
+//   );
+// };
 
 type Selectors = InitialState & Actions;
 
@@ -61,8 +61,8 @@ const persistConfig: PersistOptions<Selectors> = {
   name: "auth",
 };
 
-const baseReducer = create(logger(reducer));
-// const baseReducer = create(persist(reducer, persistConfig));
+// const baseReducer = create(logger(reducer));
+const baseReducer = create(persist(reducer, persistConfig));
 
 export const {
   useUser,

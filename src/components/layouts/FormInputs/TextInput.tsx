@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { File, Paperclip, Eye, EyeOff } from "lucide-react";
-import { ReactNode, useState } from "react";
+import { ReactNode, useRef, useState } from "react";
+import SignatureCanvas from "react-signature-canvas";
 
 export type TextInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   label?: string | JSX.Element;
@@ -109,7 +110,9 @@ const FileSvgDraw = () => {
   );
 };
 
-export const TextFileUploader = (props: TextFileProps & { value: File[] | null }) => {
+export const TextFileUploader = (
+  props: TextFileProps & { value: File[] | null }
+) => {
   const dropZoneConfig = {
     maxFiles: 5,
     maxSize: 1024 * 1024 * 4,
@@ -201,3 +204,35 @@ export function TextPassword(props: TextInputProps) {
     </div>
   );
 }
+
+export const TextSignature = (props: TextInputProps & Record<string, any>) => {
+  const ref = useRef<SignatureCanvas | null>(null);
+
+  const onChange = () => {
+    const data = ref.current?.toDataURL();
+
+    if (data) {
+      // console.log(data);
+      // downloadFileFromBase64(base64ToFile(data, "signature.jpg"))
+      props?.onChange?.({
+        target: { name: props.name ?? "", value: data },
+      } as any);
+    }
+  };
+
+  return (
+    <div
+      className={`flex flex-col font-medium w-full relative ${
+        props.containerClass ?? ""
+      }`}
+    >
+      <Label className="flex flex-col justify-center text-sm whitespace-nowrap text-stone-900 dark:text-slate-300">
+        {props.label}
+      </Label>
+      <div className="mt-2.5">
+        <SignatureCanvas {...props} ref={ref} onEnd={onChange} />
+      </div>
+      <span className="text-xs text-red-500 mt-1">{props.error}</span>
+    </div>
+  );
+};

@@ -9,9 +9,8 @@ import { dashboardPagePaths } from "@/routes";
 import { EmptyPlaceholder } from "@/components/layouts/EmptyPlaceholder";
 import { ContentHeader } from "@/components/layouts/ContentHeader";
 import { cn } from "@/lib/utils";
-import { ProposalCard } from "./components/ProposalCard";
+import { ReportCard } from "./components/ProposalCard";
 import { truncate } from "lodash";
-import { AgencyResponse } from "../Agency/types";
 
 export interface ProjectList {
   id: number;
@@ -64,9 +63,10 @@ export const Projects = () => {
           data={data?.data ?? []}
           isLoading={isPending}
           renderItem={(project, index) => (
-            <ProposalCard
+            <ReportCard
               key={index}
               {...project}
+              id={project.id}
               title={truncate(project.name, { length: 30 })}
               progress={0}
               status="continue"

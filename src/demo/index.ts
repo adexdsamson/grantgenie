@@ -6,8 +6,8 @@ export const makeArrayData = <T = unknown>(func: () => T) =>
 
 export const getDemoUser = (): User => {
   return {
+    email: faker.internet.email(),
     first_name: faker.person.firstName(),
-    id: faker.string.uuid(),
     last_name: faker.person.lastName()
   }
 }
