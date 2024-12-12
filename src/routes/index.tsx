@@ -7,6 +7,16 @@ import { NotFound } from "@/layouts/NotFound";
 import { PublicRoute } from "./PublicRoute";
 import { getPageRoutes } from "@/helpers";
 
+import { Index } from "../pages/Register";
+import { Login } from "../pages/Login";
+import { Verification } from "../pages/Verification";
+import { ForgotPassword } from "../pages/ForgotPassword";
+
+import { Home } from '@/pages/DashboardPage';
+import { Projects } from '@/pages/Projects';
+import { Employees } from '@/pages/Employees';
+import { Agencies } from '@/pages/Agency';
+
 export const authenticationPagePaths = {
   Index: "../pages/Register.tsx",
   Login: "../pages/Login",
@@ -21,26 +31,58 @@ export const dashboardPagePaths = {
   Agencies: "../pages/Agency/index.tsx",
 } as const;
 
-const pageRoutes = getPageRoutes(authenticationPagePaths);
+// const pageRoutes = getPageRoutes(authenticationPagePaths);
 export const dashboardPageRoutes = getPageRoutes(
   dashboardPagePaths,
   "dashboard"
 );
 
+const publicRoutes = [
+  {
+    path: "/",
+    element: <Index />,
+  },
+  {
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/verification",
+    element: <Verification />,
+  },
+  {
+    path: "/forgotPassword",
+    element: <ForgotPassword />,
+  },
+];
+
+const privateRoutes = [
+  {
+    path: "/dashboard",
+    element: <Home />,
+  },
+  {
+    path: "/dashboard/projects",
+    element: <Projects />,
+  },
+  {
+    path: "/dashboard/employees",
+    element: <Employees />,
+  },
+  {
+    path: "/dashboard/agencies",
+    element: <Agencies />,
+  },
+];
+
 export const routes = (
   <>
-    <Route
-      path="/"
-      element={
-        <PublicRoute />
-      }
-      errorElement={<NotFound />}
-    >
-      {pageRoutes.map((item, index) => (
+    <Route path="/" element={<PublicRoute />} errorElement={<NotFound />}>
+      {publicRoutes.map((item, index) => (
         <Route
           key={index}
           path={item.path}
-          element={<AuthLayout key={index} >{item.element}</AuthLayout>}
+          element={<AuthLayout key={index}>{item.element}</AuthLayout>}
         />
       ))}
     </Route>
@@ -48,21 +90,15 @@ export const routes = (
     <Route
       path="/dashboard"
       errorElement={<ErrorFallback />}
-      element={
-        <ProtectedRoute />
-      }
+      element={<ProtectedRoute />}
     >
-      {dashboardPageRoutes.map(
-        (item, index) => (
-          <Route
-            key={index}
-            path={item.path}
-            element={
-              <Dashboard key={index}>{item.element}</Dashboard>
-            }
-          />
-        )
-      )}
+      {privateRoutes.map((item, index) => (
+        <Route
+          key={index}
+          path={item.path}
+          element={<Dashboard key={index}>{item.element}</Dashboard>}
+        />
+      ))}
     </Route>
   </>
 );
