@@ -8,8 +8,8 @@ import { ApiResponse, ApiResponseError, DashboardResponse } from "@/types";
 import { getRequest } from "@/lib/axiosInstance";
 import { useQuery } from "@tanstack/react-query";
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
-import { BarChart, Bar, AreaChart, YAxis, XAxis, CartesianGrid, Area } from "recharts";
-import { Tooltip } from "@/components/ui/tooltip";
+import {  AreaChart, XAxis, Area } from "recharts";
+// import { Tooltip } from "@/components/ui/tooltip";
 // import { MapList } from "@/components/layouts/MapList";
 
 export const Home = () => {
@@ -81,7 +81,7 @@ export const Home = () => {
 };
 
 const RenderLine = () => {
-  const ref = useRef<HTMLDivElement>(null);
+  // const ref = useRef<HTMLDivElement>(null);
 
 
   const data = [
@@ -184,10 +184,10 @@ const RenderLine = () => {
 const RenderReportGeneratedBar = () => {
   const ref = useRef<HTMLDivElement>(null);
 
-  const { width = 0, height = 0 } = useResizeObserver({
-    ref,
-    box: "border-box",
-  });
+  // const { width = 0, height = 0 } = useResizeObserver({
+  //   ref,
+  //   box: "border-box",
+  // });
 
   return (
     <Card ref={ref} className="mt-5 h-[28rem] w-full">
@@ -195,7 +195,7 @@ const RenderReportGeneratedBar = () => {
         <CardTitle className="text-sm">Report Status</CardTitle>
       </CardHeader>
       <CardContent className="!pb-20">
-        <Bar {...{ height: height - 101, width: width - 58 }} />
+        {/* <Bar {...{ height: height - 101, width: width - 58 }} /> */}
       </CardContent>
     </Card>
   );

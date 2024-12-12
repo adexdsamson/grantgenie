@@ -3,11 +3,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Trash } from "lucide-react";
 import { Avatar as ShadcnAvatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials } from "@/lib/utils";
-import { useMutation } from "@tanstack/react-query";
-import { deleteRequest } from "@/lib/axiosInstance";
-import { ProjectList } from "@/pages/Projects";
-import { useToastHandlers } from "@/hooks/useToaster";
-import { ApiResponseError } from "@/types";
+// import { useMutation } from "@tanstack/react-query";
+// import { deleteRequest } from "@/lib/axiosInstance";
+// import { ProjectList } from "@/pages/Projects";
+// import { useToastHandlers } from "@/hooks/useToaster";
+// import { ApiResponseError } from "@/types";
 import { ConfirmAlert } from "@/components/layouts/ConfirmAlert";
 
 export interface UserCardProps {
