@@ -34,6 +34,9 @@ export const ForgotPassword = () => {
     try {
       const result = await mutateAsync(data);
 
+      console.log(result);
+      
+
       // if(result.data)
 
       success(Toast_Title, "");
