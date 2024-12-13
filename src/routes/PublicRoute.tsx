@@ -5,6 +5,6 @@ import { dashboardPageRoutes } from ".";
 
 export const PublicRoute = () => {
   const isAuthenticated = useAuthentication();
-  const dashboardIndexPath = dashboardPageRoutes[0].path;
+  // const dashboardIndexPath = dashboardPageRoutes[0].path;
   return isAuthenticated ? <Navigate to="/dashboard" /> : <Outlet />;
 };
