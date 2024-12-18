@@ -12,6 +12,7 @@ import { ErrorFallback } from "@/components/layouts/Error";
 import { Providers } from "@/hooks/useProviders/type";
 import * as Sentry from "@sentry/react";
 import './App.css'
+import { TooltipProvider } from "./components/ui/tooltip";
 
 function App() {
   const queryClient = new QueryClient();
@@ -37,9 +38,15 @@ function App() {
             props: { client: queryClient },
             children: [
               {
-                types: RouterProvider,
-                props: { router },
-              },
+                types: TooltipProvider,
+                props: {},
+                children: [
+                  {
+                    types: RouterProvider,
+                    props: { router },
+                  },
+                ]
+              }
             ],
           },
         ],

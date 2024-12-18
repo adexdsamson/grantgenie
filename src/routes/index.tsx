@@ -16,6 +16,7 @@ import { Home } from '@/pages/DashboardPage';
 import { Projects } from '@/pages/Projects';
 import { Employees } from '@/pages/Employees';
 import { Agencies } from '@/pages/Agency';
+import { ProjectDetail } from "@/pages/Projects/Details";
 
 export const authenticationPagePaths = {
   Index: "../pages/Register.tsx",
@@ -73,6 +74,13 @@ const privateRoutes = [
     path: "/dashboard/agencies",
     element: <Agencies />,
   },
+  {
+    path: '/dashboard/projects/:id/welcome',
+    element: <ProjectDetail />
+  },
+  // {
+    
+  // }
 ];
 
 export const routes = (

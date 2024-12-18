@@ -54,5 +54,32 @@ export interface DashboardResponse {
   number_of_projects:            number;
   project_completion_percentage: number;
   completed_projects:            number;
+  project_creation_trend:        ProjectCreationTrend[];
+  project_completion_trend:      any[];
+  project_completion_pie_chart:  ProjectCompletionPieChart;
 }
 
+export interface ProjectCompletionPieChart {
+  completed_projects:            number;
+  incomplete_projects:           number;
+  project_completion_percentage: number;
+  active_projects:               number;
+}
+
+export interface ProjectCreationTrend {
+  month: string;
+  count: number;
+}
+
+export interface PitchFlowResponse {
+  id:                  string;
+  user:                number;
+  project:             number;
+  payment_confirmed:   boolean;
+  signature_confirmed: boolean;
+  employees_involved:  null;
+  questions_link:      null;
+  answers_link:        null;
+  created_at:          Date;
+  updated_at:          Date;
+}

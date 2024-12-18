@@ -6,30 +6,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 // import SignatureCanvas from "react-signature-canvas";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Download, Lock } from "lucide-react";
 // import { useRef, useState } from "react";
-import {
-  ApiResponse,
-  ApiResponseError,
-  // GetAgreementResponse,
-  GetLatestAgreementResponse,
-} from "@/types";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { getRequest, postRequest } from "@/lib/axiosInstance";
-import { Forger, useForge } from "@/lib/forge";
-import { TextSignature } from "@/components/layouts/FormInputs/TextInput";
-import { useToastHandlers } from "@/hooks/useToaster";
-import { createFormData } from "@/lib/utils";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ReportDialog } from "./ReportDialog";
+import Spinner from "@/components/ui/Spinner";
 
 export interface ProposalCardProps {
   id: number;
@@ -137,7 +119,7 @@ const ProposalTypeCard = ({
         </DialogHeader>
 
         <div className="mt-3">
-          <GrantReport {...{ id, category: "grant" }} />
+          <ReportDialog {...{ id, category: "grant" }} />
 
           {projectTypes.map((type, index) => (
             <div
@@ -159,6 +141,7 @@ export interface ProjectTypeProps {
   disabled?: boolean;
   description: string;
   isSelected?: boolean;
+  isLoading?: boolean;
 }
 
 export const ProjectTypeCard: React.FC<ProjectTypeProps> = ({
@@ -174,7 +157,7 @@ export const ProjectTypeCard: React.FC<ProjectTypeProps> = ({
       {...rest}
       role="button"
       tabIndex={0}
-      className={`flex flex-col justify-center py-3 w-full bg-white rounded-xl min-h-[69px] mb-1 ${
+      className={`flex flex-col justify-center py-3 w-full bg-white rounded-xl min-h-[69px] mb-1 relative ${
         isSelected ? "border shadow" : ""
       } ${
         disabled && "opacity-45"
@@ -196,180 +179,11 @@ export const ProjectTypeCard: React.FC<ProjectTypeProps> = ({
           <p className="text-xs leading-4 text-slate-600">{description}</p>
         </div>
       </div>
-    </div>
-  );
-};
-
-export const GrantReport = ({
-  id,
-  category,
-}: {
-  id: number;
-  category: "grant" | "visa";
-}) => {
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <ProjectTypeCard
-          {...{
-            icon: "https://cdn.builder.io/api/v1/image/assets/TEMP/2a2328b2c77bb6d89d84dfa0f5a26ed5bee01218709024724ca49867929f2a42?placeholderIfAbsent=true&apiKey=877fbded3c1141a18415be7a6b510b08",
-            title: "Grants and Contracts",
-            description:
-              "Enhances the grant application process for startups and businesses",
-            isSelected: true,
-          }}
-        />
-      </DialogTrigger>
-      <DialogContent className="max-w-none w-[28rem]">
-        <DialogHeader>
-          <DialogTitle>Choose report</DialogTitle>
-          <DialogDescription>
-            Select report type to required for the agency.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="mt-3">
-          <AgreementSignature
-            {...{
-              id,
-              title: "Pitch",
-              description:
-                "A Pitch report will be generated for you after completing all questions.",
-              category,
-            }}
-          />
-
-          <AgreementSignature
-            {...{
-              id,
-              title: "Proposal",
-              description:
-                "A Proposal report will  be generated for you after completing all questions",
-              category,
-            }}
-          />
+      {rest.isLoading && (
+        <div className="absolute right-4">
+          <Spinner />
         </div>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-// ===========++++++++++++++++++++++++++++======================
-
-type AgreementSignature = {
-  id: number;
-  title: string;
-  description: string;
-  category: "grant" | "visa";
-};
-
-// type RequestForm = {
-//   agreement_id: number | string;
-//   signature_image: File;
-//   agreement_link: string;
-//   flow_type: "grant" | "visa";
-// };
-
-const AgreementSignature = ({
-  id,
-  title,
-  description,
-  category,
-}: AgreementSignature) => {
-  const { error } = useToastHandlers();
-
-  const { data } = useQuery<
-    ApiResponse<GetLatestAgreementResponse>,
-    ApiResponseError
-  >({
-    queryKey: ["agreements", id],
-    queryFn: async () =>
-      await getRequest(`agreements/latest/?category=${category}`),
-  });
-
-  const { mutateAsync, isPending } = useMutation({
-    mutationFn: async (payload: FormData) =>
-      postRequest(`grants/projects/${data?.data.id}/agreements/`, payload),
-  });
-
-  const { ForgeForm } = useForge({});
-
-  const handleSubmit = async (payload: any) => {
-    const Toast_Title = "Agreement";
-    try {
-      const formdata = createFormData({
-        flow_type: category,
-        agreement_id: data?.data.id ?? "",
-        agreement_link: data?.data.agreement_link ?? "",
-        signature_image: payload.signature,
-      });
-
-      const result = await mutateAsync(formdata);
-
-      if (!result.data) {
-        return;
-      }
-
-      // closeRef.current?.click()
-      // queryClient.invalidateQueries({ queryKey: ["project-lists"] });
-      // success(Toast_Title, "Projec created successfully");
-    } catch (err) {
-      error(Toast_Title, err as ApiResponseError);
-    }
-  };
-
-  return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <ProjectTypeCard
-          {...{
-            icon: "https://cdn.builder.io/api/v1/image/assets/TEMP/2a2328b2c77bb6d89d84dfa0f5a26ed5bee01218709024724ca49867929f2a42?placeholderIfAbsent=true&apiKey=877fbded3c1141a18415be7a6b510b08",
-            title,
-            description,
-          }}
-        />
-      </SheetTrigger>
-
-      <SheetContent className="w-[30rem] sm:max-w-none">
-        <SheetHeader>
-          <SheetTitle>Agreement</SheetTitle>
-        </SheetHeader>
-
-        <ScrollArea>
-          <div className="h-">
-            <div className="h-[38rem] w-full mt-2 bg-[#CFD0DF]">
-              <iframe
-                src={data?.data?.agreement_link}
-                className="h-full w-full"
-              />
-            </div>
-
-            <ForgeForm
-              className="flex flex-col mt-3 items-center"
-              onSubmit={handleSubmit}
-            >
-              <Forger
-                name="signature"
-                label="Sign contract"
-                component={TextSignature}
-                canvasProps={{
-                  width: 400,
-                  height: 100,
-                  className: "bg-white dark:bg-slate-800 dark:text-slate-300",
-                }}
-              />
-
-              <Button
-                type="submit"
-                isLoading={isPending}
-                className="w-full mt-8"
-              >
-                Continue
-              </Button>
-            </ForgeForm>
-          </div>
-        </ScrollArea>
-      </SheetContent>
-    </Sheet>
+      )}
+    </div>
   );
 };

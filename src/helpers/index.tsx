@@ -54,3 +54,24 @@ export const getPageRoutes = (pagePaths: PagePaths, type: "index" | "dashboard" 
 export const getPagePath = (pagePaths: PagePaths, name: keyof typeof dashboardPagePaths) => {
     return Object.entries(pagePaths).find(item => item[0].includes(name));
 }
+
+export function base64ToFile(base64String: string, fileName: string) {
+    // Split the base64 string into parts
+    const [mimePart, dataPart] = base64String.split(",");
+    if (mimePart === null) return;
+    // Extract the mime type
+    const mimeType = mimePart?.match?.(/:(.*?);/)?.[1];
+    // Decode the base64 string
+    const byteCharacters = atob(dataPart);
+    // Create an array of bytes
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    // Convert to a typed array
+    const byteArray = new Uint8Array(byteNumbers);
+    // Create a File from the typed array
+    const file = new File([byteArray], fileName, { type: mimeType });
+  
+    return file;
+  }
