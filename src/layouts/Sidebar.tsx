@@ -126,12 +126,14 @@ export const SideBar = ({ setShow, show }: sideBarProps) => {
 
         <div className="flex-1" />
 
-        <div
-          className={`flex items-center gap-3 px-3 py-2 text-gray-600 cursor-pointer`}
-        >
-          <SidebarItemIcon icon={MdInfoOutline} />
-          <h6 className="font-medium text-sm text-gray-600">Help Center</h6>
-        </div>
+        <a href="mailto:info@autogon.ai">
+          <div
+            className={`flex items-center gap-3 px-3 py-2 text-gray-600 cursor-pointer`}
+          >
+            <SidebarItemIcon icon={MdInfoOutline} />
+            <h6 className="font-medium text-sm text-gray-600">Help Center</h6>
+          </div>
+        </a>
 
         <ConfirmAlert
           text="Are you sure you want to log out?"
