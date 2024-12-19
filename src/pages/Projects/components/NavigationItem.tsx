@@ -66,7 +66,7 @@ const NavigationIcon = ({
       <React.Fragment key={iconSrc}>
         <IconButton iconSrc={iconSrc} isActive={isActive} alt={alt} />
         {index < lastItem && (
-          <Divider color={index === 0 ? "slate-600" : "neutral-200"} />
+          <Divider color={isActive ? "slate-600" : "neutral-200"} />
         )}
       </React.Fragment>
     </nav>

@@ -21,3 +21,19 @@
   87.5% {background-position:left 1px top 1px,0 0,100% 100%,0 0}
   100%  {background-position:left 1px bottom 1px,100% 0,0 100%,0 0}
 }
+
+.sd-title.sd-container-modern__title {
+  display: none;
+}
+
+.sd-body.sd-body--static {
+  max-width: 50rem;
+}
+
+.sd-description {
+  font-size: 14px;
+}
+
+.sd-input {
+  font-size: 14px;
+}

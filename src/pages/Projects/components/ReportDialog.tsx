@@ -41,15 +41,15 @@ export const ReportDialog = ({ id, category }: ReportProps) => {
         return;
       }
 
-      if (!res.data.signature_confirmed) {
-        setIsPitch(true);
-        return;
-      }
+      // if (!res.data.signature_confirmed) {
+      //   setIsPitch(true);
+      //   return;
+      // }
 
-      if (!res.data.payment_confirmed) {
-        console.log("load up the payment url");
-        return;
-      }
+      // if (!res.data.payment_confirmed) {
+      //   console.log("load up the payment url");
+      //   return;
+      // }
 
       navigate(`/dashboard/projects/${res.data.id}/welcome`);
     } catch (error) {
