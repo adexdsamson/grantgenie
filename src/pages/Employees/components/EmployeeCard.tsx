@@ -43,6 +43,7 @@ export function EmployeeCard({
                 text: `You are about to delete ${name}'s record, Are you certain about it?`,
                 title: "Remove Employee",
                 url: `grants/employees/${id}/`,
+                queryKey: "employee-lists",
                 trigger: (
                   <Button
                     variant="outline"

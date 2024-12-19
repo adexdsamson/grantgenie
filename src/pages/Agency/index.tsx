@@ -8,6 +8,7 @@ import { getRequest } from "@/lib/axiosInstance";
 import { ProfileCard } from "./components/Agency";
 import { AgencyResponse } from "./types";
 import { cn } from "@/lib/utils";
+import Placeholder from '@/assets/image.png';
 
 export const Agencies = () => {
   const { data, isPending } = useQuery<
@@ -38,7 +39,7 @@ export const Agencies = () => {
           isLoading={isPending}
           renderItem={(agency, index) => (
             <ProfileCard
-              imageUrl={agency.website_link}
+              imageUrl={Placeholder}
               name={agency.full_agency_name}
               key={index}
             />

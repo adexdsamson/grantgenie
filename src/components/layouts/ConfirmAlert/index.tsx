@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useToastHandlers } from "@/hooks/useToaster";
 import { deleteRequest } from "@/lib/axiosInstance";
 import { ApiResponse, ApiResponseError } from "@/types";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FiTrash } from "react-icons/fi";
 import {
   Dialog,
@@ -14,7 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { ReactNode } from "react";
+import { ReactNode, useRef } from "react";
 import { useSetReset } from "@/store/authSlice";
 
 type ConfirmAlertProps = {
@@ -25,11 +25,14 @@ type ConfirmAlertProps = {
   trigger?: ReactNode;
   onClose?: (open: boolean) => void;
   logout?: boolean;
-  body?: Record<string, any>
+  body?: Record<string, any>;
+  queryKey?: string;
 };
 export const ConfirmAlert = (props: ConfirmAlertProps) => {
   const setReset = useSetReset();
+  const queryClient = useQueryClient();
   const toastHandlers = useToastHandlers();
+  const closeRef = useRef<HTMLButtonElement | null>(null);
 
   const mutation = useMutation<ApiResponse<any>, ApiResponseError, undefined>({
     mutationFn: () => deleteRequest(props.url, props?.body),
@@ -40,11 +43,14 @@ export const ConfirmAlert = (props: ConfirmAlertProps) => {
     try {
       const result = await mutation.mutateAsync(undefined);
 
-      if (result.status !== 200) {
+      if (result.status !== 204) {
         toastHandlers.error(TOAST_TITLE, "Failed to delete");
         return;
       }
 
+      props.queryKey &&
+        queryClient.invalidateQueries({ queryKey: [props.queryKey] });
+      closeRef.current?.click();
       toastHandlers.success(
         TOAST_TITLE,
         result.data.message ?? "Successfully deleted"
@@ -68,8 +74,6 @@ export const ConfirmAlert = (props: ConfirmAlertProps) => {
   return (
     <Dialog
       onOpenChange={(open) => {
-        console.log("Dialog", open);
-
         props?.onClose?.(open);
       }}
     >
@@ -88,7 +92,7 @@ export const ConfirmAlert = (props: ConfirmAlertProps) => {
           </DialogHeader>
         </div>
         <div className="bg-[#F8FAFC] py-2 flex gap-3 items-center justify-end px-3">
-          <DialogClose asChild>
+          <DialogClose ref={closeRef} asChild>
             <Button className="bg-white hover:bg-white text-gray-400">
               No
             </Button>

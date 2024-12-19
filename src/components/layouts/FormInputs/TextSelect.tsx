@@ -35,9 +35,9 @@ export const TextSelect = ({ label, ...rest }: TextSelectProps) => {
           rest?.onChange?.({ target: { name: rest.name ?? "", value } })
         }
       >
-        <SelectTrigger className="w-full 1text-xs !text-stone-400">
+        <SelectTrigger className="w-full !text-xs">
           <SelectValue
-            className="1text-xs !text-gray-300"
+            className="1text-xs !text-gra-400"
             placeholder={rest?.placeholder}
           />
         </SelectTrigger>

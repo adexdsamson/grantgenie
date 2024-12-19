@@ -59,7 +59,7 @@ const publicRoutes = [
 
 const privateRoutes = [
   {
-    path: "/dashboard",
+    path: "/dashboard/home",
     element: <Home />,
   },
   {

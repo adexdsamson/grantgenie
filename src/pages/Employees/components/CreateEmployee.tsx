@@ -60,7 +60,7 @@ export const CreateEmployeeDialog = () => {
   const { error, success } = useToastHandlers();
   const closeRef = useRef<HTMLButtonElement | null>(null);
 
-  const { ForgeForm } = useForge<FormState, TextInputProps>({
+  const { ForgeForm, reset } = useForge<FormState, TextInputProps>({
     resolver: yupResolver(schema),
   });
 
@@ -75,14 +75,14 @@ export const CreateEmployeeDialog = () => {
       const formData = createFormData({ ...data, cv_file: data.cv_file[0] });
 
       const result = await mutateAsync(formData);
-      console.log(result);
 
       if (!result.data) {
         return;
       }
 
-      closeRef.current?.click?.();
+      reset();
       queryClient.invalidateQueries({ queryKey: ["employee-lists"] });
+      closeRef.current?.click?.();
       success(Toast_Title, "Employee's record created successfully");
     } catch (err) {
       error(Toast_Title, err as ApiResponseError);
@@ -133,6 +133,9 @@ export const CreateEmployeeDialog = () => {
               placeholder: "",
               containerClass: "mb-8",
               component: TextFileUploader,
+              config: {
+                accept: ".doc,.docx,.pdf"
+              },
               helperText: "",
             }}
           />

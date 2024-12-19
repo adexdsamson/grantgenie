@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { File, Paperclip, Eye, EyeOff } from "lucide-react";
 import { ReactNode, useRef, useState } from "react";
+import { DropzoneOptions } from "react-dropzone";
 import SignatureCanvas from "react-signature-canvas";
 
 export type TextInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
@@ -111,12 +112,14 @@ const FileSvgDraw = () => {
 };
 
 export const TextFileUploader = (
-  props: TextFileProps & { value: File[] | null }
+  props: TextFileProps & { value: File[] | null, config?: DropzoneOptions }
 ) => {
-  const dropZoneConfig = {
+  const { config, ...rest } = props;
+  const dropZoneConfig: DropzoneOptions = {
     maxFiles: 5,
     maxSize: 1024 * 1024 * 4,
     multiple: true,
+    ...config
   };
 
   const handleFile = (files: File[] | null) => {
@@ -126,13 +129,13 @@ export const TextFileUploader = (
   return (
     <>
       <FileUploader
-        {...props}
+        {...rest}
         value={props.value}
         onValueChange={handleFile}
         dropzoneOptions={dropZoneConfig}
         className={cn(
           "relative bg-background rounded-lg",
-          props.containerClass
+          rest.containerClass
         )}
       >
         <FileInput className="outline-dashed outline-1 outline-white bg-gray-300 h-40">
@@ -141,9 +144,9 @@ export const TextFileUploader = (
           </div>
         </FileInput>
         <FileUploaderContent>
-          {props.value &&
-            props.value.length > 0 &&
-            props.value?.map?.((file, i) => (
+          {rest.value &&
+            rest.value.length > 0 &&
+            rest.value?.map?.((file, i) => (
               <FileUploaderItem key={i} index={i}>
                 <Paperclip className="h-4 w-4 stroke-current" />
                 <span>{file.name}</span>
@@ -151,7 +154,7 @@ export const TextFileUploader = (
             ))}
         </FileUploaderContent>
       </FileUploader>
-      <span className="text-xs text-red-500 mt-1">{props.error}</span>
+      <span className="text-xs text-red-500 mt-1">{rest.error}</span>
     </>
   );
 };

@@ -68,7 +68,7 @@ export const Index = () => {
       setUser(result.data.user);
       setToken(result.data.access_token)
       success(Toast_Title, "Account created");
-      navigate("/dashboard")
+      navigate("/dashboard/home")
       // navigate("/verification")
     } catch (err) {
       error(Toast_Title, err as ApiResponseError);

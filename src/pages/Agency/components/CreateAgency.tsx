@@ -64,7 +64,7 @@ export const CreateAgency = () => {
       queryClient.invalidateQueries({ queryKey: ["agency-lists"] });
 
       success(Toast_Title, "Created Successfully");
-
+      closeRef.current?.click()
     } catch (err) {
       error(Toast_Title, err as ApiResponseError);
     }
