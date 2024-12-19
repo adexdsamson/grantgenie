@@ -88,7 +88,6 @@ export const NavigationItem: React.FC<NavItemProps> = ({ text, isActive }) => {
 const IconButton: React.FC<IconButtonProps> = ({
   iconSrc,
   isActive = false,
-  alt,
 }) => {
   const Comp = iconSrc;
   return (

@@ -3,7 +3,6 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
 import { base64ToFile } from "@/helpers";
 import { useToastHandlers } from "@/hooks/useToaster";
