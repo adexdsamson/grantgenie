@@ -215,8 +215,6 @@ export const TextSignature = (props: TextInputProps & Record<string, any>) => {
     const data = ref.current?.toDataURL();
 
     if (data) {
-      // console.log(data);
-      // downloadFileFromBase64(base64ToFile(data, "signature.jpg"))
       props?.onChange?.({
         target: { name: props.name ?? "", value: data },
       } as any);

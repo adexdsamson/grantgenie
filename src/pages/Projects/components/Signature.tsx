@@ -125,7 +125,8 @@ export const SignatureDialog = ({
             >
               <Forger
                 name="signature"
-                label="Sign contract"
+                label="Sign here"
+                containerClass="border-4 border-dashed rounded-lg p-3"
                 component={TextSignature}
                 canvasProps={{
                   width: 400,
