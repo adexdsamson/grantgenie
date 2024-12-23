@@ -51,7 +51,7 @@ export const Login = () => {
       setToken(result.data.access_token)
       success(Toast_Title, "Account created");
 
-      navigate("/dashboard/home")
+      // navigate("/dashboard/home")
     } catch (err) {
       error(Toast_Title, err as ApiResponseError);
     }

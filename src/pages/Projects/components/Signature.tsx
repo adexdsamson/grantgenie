@@ -6,7 +6,11 @@ import {
 } from "@/components/ui/sheet";
 import { base64ToFile } from "@/helpers";
 import { useToastHandlers } from "@/hooks/useToaster";
-import { fileUploadRequest, getRequest, postRequest } from "@/lib/axiosInstance";
+import {
+  fileUploadRequest,
+  getRequest,
+  postRequest,
+} from "@/lib/axiosInstance";
 import { Forger, useForge } from "@/lib/forge";
 import { createFormData } from "@/lib/utils";
 import {
@@ -28,7 +32,7 @@ type AgreementSignature = {
   open: boolean;
   onTrigger: () => void;
   onOpen: (value: boolean) => void;
-  isLoading?: boolean
+  isLoading?: boolean;
 };
 
 export const SignatureDialog = ({
@@ -39,7 +43,7 @@ export const SignatureDialog = ({
   category,
   onTrigger,
   description,
-  isLoading
+  isLoading,
 }: AgreementSignature) => {
   const { error } = useToastHandlers();
 
@@ -57,9 +61,18 @@ export const SignatureDialog = ({
       fileUploadRequest(`grants/projects/${id}/agreements/`, payload),
   });
 
-  const checkoutMutation = useMutation({
-    mutationFn: async () => await postRequest('grants/pitchflows/payment-checkout/', undefined),
-  })
+  const checkoutMutation = useMutation<
+    ApiResponse<{ status: boolean; message: string; data: { url: string } }>,
+    ApiResponseError
+  >({
+    mutationFn: async () =>
+      await postRequest("grants/pitchflows/payment-checkout/", {
+        success_url: "https://www.autogon.ai",
+      }),
+    onSuccess(data, variables, context) {
+      window.open(`http://localhost:3000/dashboard/projects/${id}/welcome`)
+    },
+  });
 
   const { ForgeForm } = useForge({});
 
@@ -94,15 +107,15 @@ export const SignatureDialog = ({
   return (
     <Sheet open={open} onOpenChange={onOpen}>
       {/* <SheetTrigger disabled> */}
-        <ProjectTypeCard
-          {...{
-            icon: "https://cdn.builder.io/api/v1/image/assets/TEMP/2a2328b2c77bb6d89d84dfa0f5a26ed5bee01218709024724ca49867929f2a42?placeholderIfAbsent=true&apiKey=877fbded3c1141a18415be7a6b510b08",
-            title,
-            description,
-            onClick: onTrigger,
-            isLoading
-          }}
-        />
+      <ProjectTypeCard
+        {...{
+          icon: "https://cdn.builder.io/api/v1/image/assets/TEMP/2a2328b2c77bb6d89d84dfa0f5a26ed5bee01218709024724ca49867929f2a42?placeholderIfAbsent=true&apiKey=877fbded3c1141a18415be7a6b510b08",
+          title,
+          isLoading,
+          description,
+          onClick: onTrigger,
+        }}
+      />
       {/* </SheetTrigger> */}
 
       <SheetContent className="w-[30rem] sm:max-w-none">

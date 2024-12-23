@@ -12,6 +12,11 @@ import { ChevronRight, Download, Lock } from "lucide-react";
 // import { useRef, useState } from "react";
 import { ReportDialog } from "./ReportDialog";
 import Spinner from "@/components/ui/Spinner";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useLazyQuery } from "@/hooks/useLazyQuery";
+import { ApiResponse, ApiResponseError, PitchFlowResponse } from "@/types";
+import { getRequest } from "@/lib/axiosInstance";
 
 export interface ProposalCardProps {
   id: number;
@@ -27,6 +32,42 @@ export const ReportCard: React.FC<ProposalCardProps> = ({
   progress,
   status,
 }) => {
+  const navigate = useNavigate();
+  const [show, setShow] = useState(false);
+
+  const [fetchQuery, query] = useLazyQuery<
+    unknown,
+    ApiResponse<PitchFlowResponse[]>,
+    ApiResponseError
+  >(
+    ["pitch-flow", id],
+    async () => await getRequest(`grants/pitchflows/?project_id=${id}`)
+  );
+
+  const handleProjectStatus = async () => {
+    try {
+      const res = await fetchQuery();
+
+      if (!res.data) {
+        return;
+      }
+
+      if (res.data.length === 0) {
+        setShow(true);
+        return;
+      }
+
+      if (!res.data[0].signature_confirmed || !res.data[0].payment_confirmed) {
+        setShow(true);
+        return;
+      }
+
+      navigate(`/dashboard/projects/${res.data[0].id}/welcome`);
+    } catch (error) {
+      console.log("err: ", error);
+    }
+  };
+
   return (
     <div className="flex flex-col justify-between px-4 py-4 bg-white rounded-md border border-solid border-slate-200 min-h-[187px] max-md:px-5">
       <div className="w-full">
@@ -67,7 +108,17 @@ export const ReportCard: React.FC<ProposalCardProps> = ({
           >
             <Download className="w-4 h-4" />
           </Button>
-          <ProposalTypeCard {...{ status, id }} />
+          <ProposalTypeCard
+            {...{
+              id,
+              status,
+              open: show,
+              onOpenChange: setShow,
+              isLoading: query.isLoading,
+              data: query.data?.data?.[0],
+              onClick: handleProjectStatus,
+            }}
+          />
         </div>
       </div>
     </div>
@@ -86,29 +137,43 @@ const projectTypes: ProjectTypeProps[] = [
   },
 ];
 
+type ProposalTypeCardProps = {
+  status: ProposalCardProps["status"];
+  onOpenChange: (val: boolean) => void;
+  id: number;
+  open: boolean;
+  onClick: () => void;
+  isLoading: boolean;
+  data?: PitchFlowResponse;
+};
+
 const ProposalTypeCard = ({
   id,
+  open,
+  data,
+  onClick,
+  isLoading,
+  onOpenChange,
   status = "continue",
-}: {
-  status: ProposalCardProps["status"];
-  id: number;
-}) => {
+}: ProposalTypeCardProps) => {
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button
-          size="sm"
-          className="h-8 gap-1"
-          disabled={status === "completed"}
-        >
-          <span className="self-stretch my-auto">{status}</span>
-          {status === "completed" ? (
-            <Lock className="w-4 h-4" />
-          ) : (
-            <ChevronRight className="w-4 h-4" />
-          )}
-        </Button>
-      </DialogTrigger>
+    <Dialog {...{ open, onOpenChange }}>
+      {/* <DialogTrigger asChild> */}
+      <Button
+        size="sm"
+        className="h-8 gap-1"
+        isLoading={isLoading}
+        onClick={onClick}
+        disabled={status === "completed"}
+      >
+        <span className="self-stretch my-auto">{status}</span>
+        {status === "completed" ? (
+          <Lock className="w-4 h-4" />
+        ) : (
+          <ChevronRight className="w-4 h-4" />
+        )}
+      </Button>
+      {/* </DialogTrigger> */}
 
       <DialogContent className="max-w-none w-[28rem]">
         <DialogHeader>
@@ -119,7 +184,14 @@ const ProposalTypeCard = ({
         </DialogHeader>
 
         <div className="mt-3">
-          <ReportDialog {...{ id, category: "grant" }} />
+          <ReportDialog
+            {...{
+              id,
+              category: "grant",
+              payment_confirmed: data?.payment_confirmed ?? false,
+              signature_confirmed: data?.signature_confirmed ?? false,
+            }}
+          />
 
           {projectTypes.map((type, index) => (
             <div

@@ -6,5 +6,5 @@ import { Navigate, Outlet } from "react-router-dom";
 export const PublicRoute = () => {
   const isAuthenticated = useAuthentication();
   // const dashboardIndexPath = dashboardPageRoutes[0].path;
-  return isAuthenticated ? <Navigate to="/dashboard" /> : <Outlet />;
+  return isAuthenticated ? <Navigate to="/dashboard/home" /> : <Outlet />;
 };

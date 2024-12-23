@@ -9,51 +9,47 @@ import {
 import { ProjectTypeCard } from "./ProposalCard";
 import { SignatureDialog } from "./Signature";
 import { useState } from "react";
-import { getRequest } from "@/lib/axiosInstance";
-import { useLazyQuery } from "@/hooks/useLazyQuery";
+import { getRequest, postRequest } from "@/lib/axiosInstance";
 import { ApiResponse, ApiResponseError, PitchFlowResponse } from "@/types";
 import { useNavigate } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
 
 type ReportProps = {
   id: number;
   category: "grant" | "visa";
+  payment_confirmed: boolean;
+  signature_confirmed: boolean;
 };
 
-export const ReportDialog = ({ id, category }: ReportProps) => {
-  const navigate = useNavigate();
+export const ReportDialog = ({
+  id,
+  category,
+  payment_confirmed,
+  signature_confirmed,
+}: ReportProps) => {
   const [isPitch, setIsPitch] = useState(false);
   const [isProposal, setIsProposal] = useState(false);
 
-  const [fetchQuery, query] = useLazyQuery<
-    unknown,
-    ApiResponse<PitchFlowResponse>,
+  const checkoutMutation = useMutation<
+    ApiResponse<{ status: boolean; message: string; data: { url: string } }>,
     ApiResponseError
-  >(
-    ["pitch-flow", id],
-    async () => await getRequest(`grants/pitchflows/?project_id=${id}`)
-  );
+  >({
+    mutationFn: async () =>
+      await postRequest("grants/pitchflows/payment-checkout/", {
+        success_url: "https://www.autogon.ai",
+      }),
+    onSuccess(data, variables, context) {},
+  });
 
   const handlePitchStatus = async () => {
-    try {
-      const res = await fetchQuery();
+    if (!signature_confirmed) {
+      setIsPitch(true);
+      return;
+    }
 
-      if (!res.data) {
-        return;
-      }
-
-      // if (!res.data.signature_confirmed) {
-      //   setIsPitch(true);
-      //   return;
-      // }
-
-      // if (!res.data.payment_confirmed) {
-      //   console.log("load up the payment url");
-      //   return;
-      // }
-
-      navigate(`/dashboard/projects/${res.data.id}/welcome`);
-    } catch (error) {
-      console.log("err: ", error);
+    if (!payment_confirmed) {
+      checkoutMutation.mutate();
+      return;
     }
   };
 
@@ -88,7 +84,6 @@ export const ReportDialog = ({ id, category }: ReportProps) => {
               description:
                 "A Pitch report will be generated for you after completing all questions.",
               category,
-              isLoading: query.isLoading,
               onTrigger: handlePitchStatus,
             }}
           />
