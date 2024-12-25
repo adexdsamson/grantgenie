@@ -9,13 +9,13 @@ import {
 import { ProjectTypeCard } from "./ProposalCard";
 import { SignatureDialog } from "./Signature";
 import { useState } from "react";
-import { getRequest, postRequest } from "@/lib/axiosInstance";
+import { postRequest } from "@/lib/axiosInstance";
 import { ApiResponse, ApiResponseError, PitchFlowResponse } from "@/types";
-import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 
 type ReportProps = {
   id: number;
+  projectId?: string;
   category: "grant" | "visa";
   payment_confirmed: boolean;
   signature_confirmed: boolean;
@@ -24,6 +24,7 @@ type ReportProps = {
 export const ReportDialog = ({
   id,
   category,
+  projectId,
   payment_confirmed,
   signature_confirmed,
 }: ReportProps) => {
@@ -36,9 +37,11 @@ export const ReportDialog = ({
   >({
     mutationFn: async () =>
       await postRequest("grants/pitchflows/payment-checkout/", {
-        success_url: "https://www.autogon.ai",
+        success_url: `http://localhost:5173/dashboard/projects/${projectId}/welcome?projectId=${id}`,
       }),
-    onSuccess(data, variables, context) {},
+    onSuccess(data) {
+      window.open(data.data.data.url, "_self");
+    },
   });
 
   const handlePitchStatus = async () => {

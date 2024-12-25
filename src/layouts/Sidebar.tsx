@@ -165,7 +165,9 @@ export const SideBar = ({ setShow, show }: sideBarProps) => {
           </div>
         </div>
 
-        <div className="h-40 bg-[#9899AD] rounded-xl shadow-md" />
+        <div className="h-40 bg-[#9899AD] rounded-xl shadow-md flex items-center justify-center">
+          <img src={Img} className="w-32 h-32 object-contain opacity-25" />
+        </div>
       </div>
     </aside>
   );

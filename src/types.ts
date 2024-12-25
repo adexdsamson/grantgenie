@@ -76,10 +76,16 @@ export interface PitchFlowResponse {
   user:                number;
   project:             number;
   payment_confirmed:   boolean;
-  signature_confirmed: boolean;
-  employees_involved:  null;
-  questions_link:      null;
+  agreement_signed: boolean;
+  employees_involved:  null | number[];
+  questions:      null | Record<number, QuestionsLink>;
   answers_link:        null;
   created_at:          Date;
   updated_at:          Date;
+}
+
+export interface QuestionsLink {
+  question:      string;
+  sample_answer: string;
+  guidance:      string;
 }

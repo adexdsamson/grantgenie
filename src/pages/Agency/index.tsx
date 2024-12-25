@@ -30,7 +30,7 @@ export const Agencies = () => {
         <CreateAgency />
       </header>
       <div
-        className={cn("md:grid-cols-4 grid-cols-1 gap-5 mt-5", {
+        className={cn("md:grid-cols-4 grid-cols-1 gap-5 my-5", {
           grid: (data?.data.length ?? 0 > 1) || isPending,
         })}
       >

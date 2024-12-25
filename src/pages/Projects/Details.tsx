@@ -11,10 +11,18 @@ import "survey-core/defaultV2.min.css";
 import { CustomSurveyPanelless } from "./constants";
 import { cn } from "@/lib/utils";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ApiResponse, ApiResponseError, EmployeeListResponse } from "@/types";
+import {
+  ApiResponse,
+  ApiResponseError,
+  EmployeeListResponse,
+  PitchFlowResponse,
+  QuestionsLink,
+} from "@/types";
 import { getRequest, patchRequest, postRequest } from "@/lib/axiosInstance";
 import { useToastHandlers } from "@/hooks/useToaster";
 import { useLocation, useNavigate } from "react-router-dom";
+import { ScreenLoader } from "@/components/layouts/ScreenLoader";
+import { useLazyQuery } from "@/hooks/useLazyQuery";
 
 export const navigationItems = [
   {
@@ -49,8 +57,9 @@ export const ProjectDetail = () => {
     "welcome-page"
   );
 
-  console.log(location);
-  
+  const projectId =
+    location.search.split("=")?.[1] ?? (location.state.project as number);
+  const projectUUID = extractUUID(location.pathname);
 
   const { data } = useQuery<
     ApiResponse<EmployeeListResponse[]>,
@@ -60,6 +69,29 @@ export const ProjectDetail = () => {
     queryFn: async () => await getRequest("grants/employees/"),
   });
 
+  const pitchQuery = useQuery<
+    ApiResponse<PitchFlowResponse[]>,
+    ApiResponseError
+  >({
+    queryKey: ["pitch-flows"],
+    queryFn: async () =>
+      await getRequest(`grants/pitchflows/?project_id=${projectId}`),
+  });
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: async () =>
+      await postRequest(`grants/confirm_payment/${projectUUID}/`, undefined),
+  });
+
+  useEffect(() => {
+    if (
+      pitchQuery.data?.data.length &&
+      !pitchQuery.data?.data[0].payment_confirmed
+    ) {
+      mutate();
+    }
+  }, [pitchQuery.isSuccess]);
+
   return (
     <div className="">
       <WelcomeBanner
@@ -67,10 +99,18 @@ export const ProjectDetail = () => {
         description="Learn more about the grant and how GrantGenie platform works"
       />
 
+      <ScreenLoader isLoading={isPending || pitchQuery.isLoading} />
+
       {showPage === "welcome-page" ? (
         <WelcomePage onNext={() => setShowPage("question-page")} />
       ) : (
-        <QuestionPage employees={data?.data ?? []} id="" />
+        <QuestionPage
+          employees={data?.data ?? []}
+          questions={pitchQuery.data?.data[0].questions ?? null}
+          hasSubmittedEmploees={
+            pitchQuery.data?.data[0].employees_involved?.length !== 0
+          }
+        />
       )}
     </div>
   );
@@ -138,7 +178,7 @@ function convertToSurveyJS(jsonData: any) {
     pages: [] as any[],
   };
 
-  const questions = jsonData.questions_json;
+  const questions = jsonData;
 
   Object.keys(questions).forEach((key) => {
     const questionData = questions[key];
@@ -166,49 +206,63 @@ function convertToSurveyJS(jsonData: any) {
   return surveyJSON;
 }
 
-const QuestionPage = (props: {
+type QuestionPageProps = {
   employees: EmployeeListResponse[];
-  id: string;
-}) => {
+  hasSubmittedEmploees: boolean;
+  questions: PitchFlowResponse["questions"] | null;
+};
+
+const QuestionPage = (props: QuestionPageProps) => {
+  const location = useLocation();
   const navigate = useNavigate();
-  const [show, setShow] = useState(false);
   const { error, success } = useToastHandlers();
   const progressBarRef = useRef<HTMLDivElement>(null);
+  const [show, setShow] = useState(() => (props.questions ? true : false));
 
-  const questionMutation = useMutation({
+  const projectUUID = extractUUID(location.pathname);
+
+  const questionMutation = useMutation<
+    ApiResponse<Record<number, QuestionsLink>>,
+    ApiResponseError
+  >({
     mutationFn: async () =>
       await postRequest(
-        `grants/pitchflows/${props.id}/generate-questions/`,
-        undefined
+        `grants/pitchflows/${projectUUID}/generate-questions/`,
+        {
+          include_answers: true,
+        }
       ),
-    onSuccess(data) {
+    onSuccess() {
       setShow(!show);
     },
-    // onError(err, variables, context) {
-    //   error("Pitch", err as ApiResponseError);
-    // },
   });
 
   const { mutate } = useMutation({
     mutationFn: async (payload: {
       topic: string;
       employees_involved: number[];
-    }) =>
-      await patchRequest(`grants/pitchflows/?project_id=${props.id}`, payload),
-    onSuccess(data, variables, context) {
+    }) => await patchRequest(`grants/pitchflows/${projectUUID}/`, payload),
+    onSuccess() {
       questionMutation.mutate();
     },
-    onError(err, variables, context) {
+    onError(err) {
       error("Pitch", err as ApiResponseError);
     },
   });
 
+  const [fetchPdf] = useLazyQuery(
+    ["generate-pdf", projectUUID],
+    async () =>
+      await getRequest(`grants/pitchflows/${projectUUID}/generate-pdf/`),
+  );
+
   const answerMutation = useMutation({
     mutationFn: async (payload: any) =>
-      await patchRequest(`grants/pitchflows/${props.id}/`, payload),
-    onSuccess(data) {
+      await patchRequest(`grants/pitchflows/${projectUUID}/`, payload),
+    onSuccess() {
       success("Answer Submission", "Answer submitted successfully");
-      navigate(`/dashboard/projects`);
+      fetchPdf()
+      navigate('/dashboard/projects')
     },
     onError(err) {
       error("Submitting Answer", err as ApiResponseError);
@@ -247,8 +301,11 @@ const QuestionPage = (props: {
   };
 
   const survey = new Model(
-    show ? convertToSurveyJS(questionMutation.data?.data) : surveyJson
+    show
+      ? convertToSurveyJS(questionMutation.data?.data ?? props.questions)
+      : surveyJson
   );
+
   survey.applyTheme(CustomSurveyPanelless);
 
   useEffect(() => {
@@ -274,10 +331,12 @@ const QuestionPage = (props: {
 
   const handleComplete = (survey: Model) => {
     if (!show) {
-      mutate({
-        employees_involved: survey.dataemployees,
+      const payload = {
+        employees_involved: survey.data.employees,
         topic: survey.data.topic,
-      });
+      };
+
+      mutate(payload);
       return;
     }
 
@@ -293,6 +352,12 @@ const QuestionPage = (props: {
   };
 
   survey.onComplete.add(handleComplete);
+
+  useEffect(() => {
+    if (props.hasSubmittedEmploees && props.questions === null) {
+      questionMutation.mutate();
+    }
+  }, [props.hasSubmittedEmploees, props.questions]);
 
   return (
     <div className="mt-5">
@@ -315,3 +380,16 @@ const QuestionPage = (props: {
     </div>
   );
 };
+
+// Function to extract UUID from a given URL
+function extractUUID(url: string) {
+  // Regular expression to match a UUID (version 4 format)
+  const uuidRegex =
+    /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/;
+
+  // Find the match in the URL
+  const match = url.match(uuidRegex);
+
+  // Return the matched UUID or null if not found
+  return match ? match[0] : null;
+}

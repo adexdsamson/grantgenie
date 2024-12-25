@@ -17,12 +17,14 @@ import {
   ApiResponse,
   ApiResponseError,
   GetLatestAgreementResponse,
+  PitchFlowResponse,
 } from "@/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ProjectTypeCard } from "./ProposalCard";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { TextSignature } from "@/components/layouts/FormInputs/TextInput";
 import { Button } from "@/components/ui/button";
+import { useLazyQuery } from "@/hooks/useLazyQuery";
 
 type AgreementSignature = {
   id: number;
@@ -51,26 +53,37 @@ export const SignatureDialog = ({
     ApiResponse<GetLatestAgreementResponse>,
     ApiResponseError
   >({
-    queryKey: ["agreements", id],
+    queryKey: ["agreements", category],
     queryFn: async () =>
       await getRequest(`agreements/latest/?category=${category}`),
   });
 
   const { mutateAsync, isPending } = useMutation({
+    mutationKey: ["agreement", id],
     mutationFn: async (payload: FormData) =>
-      fileUploadRequest(`grants/projects/${id}/agreements/`, payload),
+      await fileUploadRequest(`grants/projects/${id}/agreements/`, payload),
   });
+
+  const [fetchQuery] = useLazyQuery<
+    unknown,
+    ApiResponse<PitchFlowResponse[]>,
+    ApiResponseError
+  >(
+    ["pitchflow", id],
+    async () => await getRequest(`grants/pitchflows/?project_id=${id}`)
+  );
 
   const checkoutMutation = useMutation<
     ApiResponse<{ status: boolean; message: string; data: { url: string } }>,
-    ApiResponseError
+    ApiResponseError,
+    { projectId: string }
   >({
-    mutationFn: async () =>
+    mutationFn: async (data: { projectId: string }) =>
       await postRequest("grants/pitchflows/payment-checkout/", {
-        success_url: "https://www.autogon.ai",
+        success_url: `http://localhost:5173/dashboard/projects/${data.projectId}/welcome?projectId=${id}`,
       }),
-    onSuccess(data, variables, context) {
-      window.open(`http://localhost:3000/dashboard/projects/${id}/welcome`)
+    onSuccess(data) {
+      window.open(data.data.data.url, "_self");
     },
   });
 
@@ -94,7 +107,15 @@ export const SignatureDialog = ({
         return;
       }
 
-      checkoutMutation.mutate();
+      const res = await fetchQuery();
+
+      if (res.data.length === 0) {
+        return;
+      }
+
+      checkoutMutation.mutate({
+        projectId: res.data?.[0].id
+      });
 
       // closeRef.current?.click()
       // queryClient.invalidateQueries({ queryKey: ["project-lists"] });
@@ -128,7 +149,7 @@ export const SignatureDialog = ({
             <div className="h-[38rem] w-full mt-2 bg-[#CFD0DF]">
               <iframe
                 src={data?.data?.agreement_link}
-                className="h-full w-full"
+                className="h-full w-full bg-white"
               />
             </div>
 

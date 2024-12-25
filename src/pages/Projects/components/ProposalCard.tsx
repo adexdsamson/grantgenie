@@ -8,29 +8,33 @@ import {
 } from "@/components/ui/dialog";
 // import SignatureCanvas from "react-signature-canvas";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Download, Lock } from "lucide-react";
+import { ChevronRight, Download, Lock, Trash } from "lucide-react";
 // import { useRef, useState } from "react";
+import { useState } from "react";
 import { ReportDialog } from "./ReportDialog";
 import Spinner from "@/components/ui/Spinner";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLazyQuery } from "@/hooks/useLazyQuery";
-import { ApiResponse, ApiResponseError, PitchFlowResponse } from "@/types";
 import { getRequest } from "@/lib/axiosInstance";
+import { ConfirmAlert } from "@/components/layouts/ConfirmAlert";
+import { ApiResponse, ApiResponseError, PitchFlowResponse } from "@/types";
+import { useQuery } from "@tanstack/react-query";
 
 export interface ProposalCardProps {
   id: number;
   title: string;
-  progress: number;
   status: "continue" | "completed";
   onClick: () => void;
+  description: string;
+  grant_pitchflow_uuid?: string
 }
 
 export const ReportCard: React.FC<ProposalCardProps> = ({
   id,
   title,
-  progress,
   status,
+  description,
+  grant_pitchflow_uuid,
 }) => {
   const navigate = useNavigate();
   const [show, setShow] = useState(false);
@@ -43,6 +47,22 @@ export const ReportCard: React.FC<ProposalCardProps> = ({
     ["pitch-flow", id],
     async () => await getRequest(`grants/pitchflows/?project_id=${id}`)
   );
+
+  const [fetch, mutation] = useLazyQuery<
+    unknown,
+    ApiResponse<PitchFlowResponse[]>,
+    ApiResponseError
+  >(
+    ["pitch-flow", id],
+    async () => await getRequest(`grants/pitchflows/${grant_pitchflow_uuid}/generate-pdf/`)
+  );
+
+  // useQuery({
+  //   queryKey: ["generate-pdf", query.data?.data[0].id],
+  //   queryFn: async () =>
+  //     await getRequest(`grants/pitchflows/${query.data?.data[0].id}/generate-pdf/`),
+  //   enabled: query.isSuccess
+  // });
 
   const handleProjectStatus = async () => {
     try {
@@ -57,12 +77,14 @@ export const ReportCard: React.FC<ProposalCardProps> = ({
         return;
       }
 
-      if (!res.data[0].signature_confirmed || !res.data[0].payment_confirmed) {
+      if (!res.data?.[0].agreement_signed || !res.data?.[0].payment_confirmed) {
         setShow(true);
         return;
       }
 
-      navigate(`/dashboard/projects/${res.data[0].id}/welcome`);
+      navigate(`/dashboard/projects/${res.data?.[0].id}/welcome`, {
+        state: res.data?.[0],
+      });
     } catch (error) {
       console.log("err: ", error);
     }
@@ -71,8 +93,22 @@ export const ReportCard: React.FC<ProposalCardProps> = ({
   return (
     <div className="flex flex-col justify-between px-4 py-4 bg-white rounded-md border border-solid border-slate-200 min-h-[187px] max-md:px-5">
       <div className="w-full">
-        <div className="px-4 py-1 w-fit text-xs font-sans mb-1 leading-loose whitespace-nowrap rounded bg-slate-300 text-slate-900">
-          Proposal
+        <div className="flex items-center justify-between">
+          <div className="px-4 py-1 w-fit text-xs font-sans mb-1 leading-loose whitespace-nowrap rounded bg-slate-300 text-slate-900">
+            Proposal
+          </div>
+
+          <ConfirmAlert
+            title="Final confirmation"
+            text="This action cannot be undone"
+            url={`grants/projects/${id}/`}
+            queryKey="project-lists"
+            trigger={
+              <Button size="icon" className="h-8 !px-2" variant="outline">
+                <Trash className="w-4 h-4 text-red-600" />
+              </Button>
+            }
+          />
         </div>
 
         <div className="flex flex-col max-w-full w-[250px]">
@@ -80,10 +116,11 @@ export const ReportCard: React.FC<ProposalCardProps> = ({
             {title}
           </h3>
         </div>
+        <p className="text-xs mt-0.5 text-gray-500">{description}</p>
       </div>
 
       <div>
-        <div className="flex flex-col mt-7 w-full rounded-[40px]">
+        {/* <div className="flex flex-col mt-7 w-full rounded-[40px]">
           <p className="self-start text-xs leading-snug text-slate-700 font-sans">
             Progress
           </p>
@@ -97,13 +134,16 @@ export const ReportCard: React.FC<ProposalCardProps> = ({
               aria-valuemax={100}
             />
           </div>
-        </div>
+        </div> */}
 
         <div className="flex gap-10 justify-between items-center mt-1 w-full">
           <Button
-            className="h-8 !px-2"
             size="icon"
             variant="outline"
+            className="h-8 !px-2"
+            onClick={fetch}
+            isLoading={mutation.isLoading}
+            disabled={status === "continue"}
             aria-label="Proposal action"
           >
             <Download className="w-4 h-4" />
@@ -186,10 +226,11 @@ const ProposalTypeCard = ({
         <div className="mt-3">
           <ReportDialog
             {...{
-              id,
+              id: id,
+              projectId: data?.id,
               category: "grant",
               payment_confirmed: data?.payment_confirmed ?? false,
-              signature_confirmed: data?.signature_confirmed ?? false,
+              signature_confirmed: data?.agreement_signed ?? false,
             }}
           />
 
