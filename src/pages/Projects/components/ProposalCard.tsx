@@ -4,7 +4,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  // DialogTrigger,
 } from "@/components/ui/dialog";
 // import SignatureCanvas from "react-signature-canvas";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,7 @@ import { useLazyQuery } from "@/hooks/useLazyQuery";
 import { getRequest } from "@/lib/axiosInstance";
 import { ConfirmAlert } from "@/components/layouts/ConfirmAlert";
 import { ApiResponse, ApiResponseError, PitchFlowResponse } from "@/types";
-import { useQuery } from "@tanstack/react-query";
+// import { useQuery } from "@tanstack/react-query";
 
 export interface ProposalCardProps {
   id: number;

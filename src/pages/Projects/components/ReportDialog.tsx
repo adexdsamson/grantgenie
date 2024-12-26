@@ -10,7 +10,7 @@ import { ProjectTypeCard } from "./ProposalCard";
 import { SignatureDialog } from "./Signature";
 import { useState } from "react";
 import { postRequest } from "@/lib/axiosInstance";
-import { ApiResponse, ApiResponseError, PitchFlowResponse } from "@/types";
+import { ApiResponse, ApiResponseError } from "@/types";
 import { useMutation } from "@tanstack/react-query";
 
 type ReportProps = {

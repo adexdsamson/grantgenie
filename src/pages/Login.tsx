@@ -12,7 +12,6 @@ import { postRequest } from "@/lib/axiosInstance";
 import { ApiResponse, ApiResponseError, AuthResponse } from "@/types";
 import { Button } from "@/components/ui/button";
 import { useSetToken, useSetUser } from "@/store/authSlice";
-import { useNavigate } from "react-router-dom";
 
 type FormState = {
   email: string;
@@ -27,7 +26,6 @@ const schema = yup.object({
 export const Login = () => {
   const setUser = useSetUser()
   const setToken = useSetToken()
-  const navigate = useNavigate()
   const { error, success } = useToastHandlers();
 
   const { ForgeForm } = useForge<FormState, TextInputProps>({
