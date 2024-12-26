@@ -12,10 +12,10 @@ import { Login } from "../pages/Login";
 import { Verification } from "../pages/Verification";
 import { ForgotPassword } from "../pages/ForgotPassword";
 
-import { Home } from '@/pages/DashboardPage';
-import { Projects } from '@/pages/Projects';
-import { Employees } from '@/pages/Employees';
-import { Agencies } from '@/pages/Agency';
+import { Home } from "@/pages/DashboardPage";
+import { Projects } from "@/pages/Projects";
+import { Employees } from "@/pages/Employees";
+import { Agencies } from "@/pages/Agency";
 import { ProjectDetail } from "@/pages/Projects/Details";
 
 export const authenticationPagePaths = {
@@ -75,11 +75,11 @@ const privateRoutes = [
     element: <Agencies />,
   },
   {
-    path: '/dashboard/projects/:id/welcome',
-    element: <ProjectDetail />
+    path: "/dashboard/projects/:id/welcome",
+    element: <ProjectDetail />,
   },
   // {
-    
+
   // }
 ];
 

@@ -19,7 +19,7 @@ export const AuthLayout = (props: { children: ReactNode }) => {
             <div className="flex items-center gap-1 pl-5">
               <img src={GrantGenieLogo} className="" />
               <h1 className="text-5xl font-extrabold tracking-tight leading-none max-md:ml-2.5 max-md:text-4xl">
-                GrantGenie
+                GrantsGenie
               </h1>
             </div>
             <p className="mt-2 ml-8 text-base leading-7 max-md:max-w-full">

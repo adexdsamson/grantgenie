@@ -80,7 +80,7 @@ export const SignatureDialog = ({
   >({
     mutationFn: async (data: { projectId: string }) =>
       await postRequest("grants/pitchflows/payment-checkout/", {
-        success_url: `http://localhost:5173/dashboard/projects/${data.projectId}/welcome?projectId=${id}`,
+        success_url: `${import.meta.env.VITE_APP_BASE_URL}/dashboard/projects/${data.projectId}/welcome?projectId=${id}`,
       }),
     onSuccess(data) {
       window.open(data.data.data.url, "_self");
