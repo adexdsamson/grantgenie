@@ -55,7 +55,7 @@ export interface DashboardResponse {
   project_completion_percentage: number;
   completed_projects:            number;
   project_creation_trend:        ProjectCreationTrend[];
-  project_completion_trend:      any[];
+  project_completion_trend:      ProjectCompletionTrend[];
   project_completion_pie_chart:  ProjectCompletionPieChart;
 }
 
@@ -66,9 +66,20 @@ export interface ProjectCompletionPieChart {
   active_projects:               number;
 }
 
-export interface ProjectCreationTrend {
+export interface ProjectCompletionTrend {
+  year: number;
+  data: Trends[];
+}
+
+export interface Trends {
   month: string;
   count: number;
+}
+
+
+export interface ProjectCreationTrend {
+  year: number;
+  data: Trends[];
 }
 
 export interface PitchFlowResponse {

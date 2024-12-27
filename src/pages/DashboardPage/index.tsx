@@ -3,24 +3,38 @@
 import { StatCard } from "./components/StatsCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRef } from "react";
-// import { useResizeObserver } from "usehooks-ts";
-import { ApiResponse, ApiResponseError, DashboardResponse, ProjectCompletionPieChart } from "@/types";
+import { useResizeObserver } from "usehooks-ts";
+import {
+  ApiResponse,
+  ApiResponseError,
+  DashboardResponse,
+  ProjectCompletionPieChart,
+  ProjectCompletionTrend,
+  ProjectCreationTrend,
+} from "@/types";
 import { getRequest } from "@/lib/axiosInstance";
 import { useQuery } from "@tanstack/react-query";
-import { ChartConfig, ChartContainer } from "@/components/ui/chart";
-import { AreaChart, XAxis, Area, PieChart, Pie } from "recharts";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import {
+  AreaChart,
+  XAxis,
+  Area,
+  PieChart,
+  Pie,
+  Bar,
+  BarChart,
+  CartesianGrid,
+} from "recharts";
 import { Tooltip } from "@/components/ui/tooltip";
 // import { Tooltip } from "@/components/ui/tooltip";
 // import { MapList } from "@/components/layouts/MapList";
 
 export const Home = () => {
-  // const ref = useRef<HTMLDivElement>(null);
-
-  // const { width = 0, height = 0 } = useResizeObserver({
-  //   ref,
-  //   box: "border-box",
-  // });
-
   const { data } = useQuery<ApiResponse<DashboardResponse>, ApiResponseError>({
     queryKey: ["dashboard"],
     queryFn: async () => await getRequest("grants/dashboard-summary/"),
@@ -63,10 +77,10 @@ export const Home = () => {
         ))}
       </section>
 
-      <RenderLine />
+      <RenderLine trends={data?.data.project_completion_trend ?? []} />
 
       <div className="grid grid-cols-2 gap-2">
-        <RenderReportGeneratedBar />
+        <RenderReportGeneratedBar trends={data?.data.project_creation_trend ?? []} />
 
         <RenderPie {...data?.data.project_completion_pie_chart} />
       </div>
@@ -74,60 +88,23 @@ export const Home = () => {
   );
 };
 
-const RenderLine = () => {
+const RenderLine = ({ trends }: { trends: ProjectCompletionTrend[] }) => {
   // const ref = useRef<HTMLDivElement>(null);
+  const currentYearTrend = populateMissingMonths(trends)?.find?.(
+    (item) => item.year === new Date().getFullYear()
+  );
 
-  const data = [
-    {
-      name: "Page A",
-      uv: 4000,
-      pv: 2400,
-      amt: 2400,
-    },
-    {
-      name: "Page B",
-      uv: 3000,
-      pv: 1398,
-      amt: 2210,
-    },
-    {
-      name: "Page C",
-      uv: 2000,
-      pv: 9800,
-      amt: 2290,
-    },
-    {
-      name: "Page D",
-      uv: 2780,
-      pv: 3908,
-      amt: 2000,
-    },
-    {
-      name: "Page E",
-      uv: 1890,
-      pv: 4800,
-      amt: 2181,
-    },
-    {
-      name: "Page F",
-      uv: 2390,
-      pv: 3800,
-      amt: 2500,
-    },
-    {
-      name: "Page G",
-      uv: 3490,
-      pv: 4300,
-      amt: 2100,
-    },
-  ];
+  const data = currentYearTrend?.data.map((item) => ({
+    name: item?.month,
+    count: item?.count,
+  }));
 
   const chartConfig = {} satisfies ChartConfig;
 
   return (
     <Card className="mt-5">
       <CardHeader>
-        <CardTitle className="text-sm">Report Status</CardTitle>
+        <CardTitle className="text-sm">Project Completion</CardTitle>
       </CardHeader>
       <CardContent>
         <ChartContainer
@@ -136,30 +113,16 @@ const RenderLine = () => {
         >
           <AreaChart accessibilityLayer data={data}>
             <defs>
-              <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#82ca9d" stopOpacity={0.8} />
                 <stop offset="95%" stopColor="#82ca9d" stopOpacity={0} />
               </linearGradient>
             </defs>
 
             <XAxis dataKey="name" />
-            {/* <YAxis /> */}
-            {/* <CartesianGrid strokeDasharray="3 3" /> */}
-            {/* <Tooltip /> */}
             <Area
               type="monotone"
-              dataKey="uv"
-              stroke="#8884d8"
-              fillOpacity={1}
-              fill="url(#colorUv)"
-            />
-            <Area
-              type="monotone"
-              dataKey="pv"
+              dataKey="count"
               stroke="#82ca9d"
               fillOpacity={1}
               fill="url(#colorPv)"
@@ -171,21 +134,41 @@ const RenderLine = () => {
   );
 };
 
-const RenderReportGeneratedBar = () => {
-  const ref = useRef<HTMLDivElement>(null);
+const RenderReportGeneratedBar = ({ trends }: { trends: ProjectCreationTrend[] }) => {
+  const currentYearTrend = populateMissingMonths(trends)?.find?.(
+    (item) => item.year === new Date().getFullYear()
+  );
 
-  // const { width = 0, height = 0 } = useResizeObserver({
-  //   ref,
-  //   box: "border-box",
-  // });
+  const chartData = currentYearTrend?.data.map((item) => ({
+    month: item?.month,
+    count: item?.count,
+  }));
+
+  const chartConfig = {
+    count: {
+      label: "Count",
+      color: "#2563eb",
+    },
+  } satisfies ChartConfig;
 
   return (
-    <Card ref={ref} className="my-5 h-[28rem] w-full">
+    <Card className="my-5 h-[28rem] w-full">
       <CardHeader className="pb-0">
-        <CardTitle className="text-sm">Report Status</CardTitle>
+        <CardTitle className="text-sm">Project Creation</CardTitle>
       </CardHeader>
-      <CardContent className="!pb-20">
-        {/* <Bar {...{ height: height - 101, width: width - 58 }} /> */}
+      <CardContent className="h-[24rem]">
+        <ChartContainer config={chartConfig} className="h-full w-full">
+          <BarChart accessibilityLayer data={chartData}>
+            <XAxis
+              dataKey="month"
+              tickLine={false}
+              tickMargin={10}
+              axisLine={false}
+              tickFormatter={(value) => value.slice(0, 3)}
+            />
+            <Bar dataKey="count" fill="var(--color-desktop)" radius={4} />
+          </BarChart>
+        </ChartContainer>
       </CardContent>
     </Card>
   );
@@ -195,9 +178,9 @@ const RenderPie = (props: Partial<ProjectCompletionPieChart>) => {
   const chartConfig = {} satisfies ChartConfig;
 
   const data01 = [
-    { name: 'Completed projects', value: props.completed_projects ?? 0 },
-    { name: 'Incomplete projects', value: props.incomplete_projects ?? 0 },
-    { name: 'Active projects', value: props.active_projects ?? 0},
+    { name: "Completed projects", value: props.completed_projects ?? 0 },
+    { name: "Incomplete projects", value: props.incomplete_projects ?? 0 },
+    { name: "Active projects", value: props.active_projects ?? 0 },
   ];
 
   return (
@@ -210,7 +193,7 @@ const RenderPie = (props: Partial<ProjectCompletionPieChart>) => {
           config={chartConfig}
           className="min-h-[20rem] max-h-[60rem] w-full"
         >
-          <PieChart >
+          <PieChart>
             <Pie
               dataKey="value"
               isAnimationActive={false}
@@ -228,3 +211,39 @@ const RenderPie = (props: Partial<ProjectCompletionPieChart>) => {
     </Card>
   );
 };
+
+function populateMissingMonths(data: ProjectCreationTrend[]) {
+  // List of all months in order
+  const allMonths = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  return data.map((yearData) => {
+    // Create a map of months in the current data for faster lookup
+    const existingMonths = new Set(yearData.data.map((item) => item.month));
+
+    // Populate missing months with count 0
+    const fullData = allMonths.map((month) => {
+      if (existingMonths.has(month)) {
+        // Keep the existing month data
+        return yearData.data.find((item) => item.month === month);
+      } else {
+        // Add the missing month with count 0
+        return { month, count: 0 };
+      }
+    });
+
+    return { ...yearData, data: fullData };
+  });
+}

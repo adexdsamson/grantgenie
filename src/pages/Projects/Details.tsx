@@ -216,7 +216,6 @@ const QuestionPage = (props: QuestionPageProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { error, success } = useToastHandlers();
-  const progressBarRef = useRef<HTMLDivElement>(null);
   const [show, setShow] = useState(() => (props.questions ? true : false));
 
   const projectUUID = extractUUID(location.pathname);
@@ -262,7 +261,7 @@ const QuestionPage = (props: QuestionPageProps) => {
     onSuccess() {
       success("Answer Submission", "Answer submitted successfully");
       fetchPdf()
-      navigate('/dashboard/projects')
+      navigate("/dashboard/projects");
     },
     onError(err) {
       error("Submitting Answer", err as ApiResponseError);
@@ -300,34 +299,13 @@ const QuestionPage = (props: QuestionPageProps) => {
     ],
   };
 
-  const survey = new Model(
-    show
-      ? convertToSurveyJS(questionMutation.data?.data ?? props.questions)
-      : surveyJson
-  );
+  const Json = show ? questionMutation.isSuccess
+    ? convertToSurveyJS(questionMutation.data?.data ?? props.questions) : null
+    : surveyJson;
+
+  const survey = new Model(Json);
 
   survey.applyTheme(CustomSurveyPanelless);
-
-  useEffect(() => {
-    const updateProgressBar = (): void => {
-      const totalPages = survey?.pages?.length || 1;
-      const currentPageNo = (survey?.currentPageNo || 0) + 1;
-      const progress = (currentPageNo / totalPages) * 100;
-
-      if (progressBarRef.current) {
-        progressBarRef.current.style.width = `${progress}%`;
-        // progressBarRef.current.textContent = `${Math.round(progress)}%`;
-      }
-    };
-
-    // Update the progress bar when the current page changes
-    survey.onCurrentPageChanged.add(() => {
-      updateProgressBar();
-    });
-
-    // Initial progress bar update
-    updateProgressBar();
-  }, [survey]);
 
   const handleComplete = (survey: Model) => {
     if (!show) {
@@ -354,24 +332,14 @@ const QuestionPage = (props: QuestionPageProps) => {
   survey.onComplete.add(handleComplete);
 
   useEffect(() => {
-    if (props.hasSubmittedEmploees && props.questions === null) {
+    if (props.hasSubmittedEmploees && props.questions !== null) {
       questionMutation.mutate();
     }
   }, [props.hasSubmittedEmploees, props.questions]);
 
   return (
     <div className="mt-5">
-      <div
-        className={cn("border rounded-2xl w-full h-3 relative bg-indigo-100")}
-      >
-        <div
-          ref={progressBarRef}
-          className="w-0 h-full bg-primary text-center text-white rounded-2xl"
-          style={{
-            transition: "width 0.3s ease",
-          }}
-        ></div>
-      </div>
+      <ProgressBar {...{ survey }} />
       <img src={Logo} className="h-14 w-14" />
 
       <div className="h-full w-full bg-orange-900">
@@ -392,4 +360,43 @@ function extractUUID(url: string) {
 
   // Return the matched UUID or null if not found
   return match ? match[0] : null;
+}
+
+const ProgressBar = ({ survey }: { survey: Model}) => {
+  const progressBarRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const updateProgressBar = (): void => {
+      const totalPages = survey?.pages?.length || 1;
+      const currentPageNo = (survey?.currentPageNo || 0) + 1;
+      const progress = (currentPageNo / totalPages) * 100;
+
+      if (progressBarRef.current) {
+        progressBarRef.current.style.width = `${progress}%`;
+        // progressBarRef.current.textContent = `${Math.round(progress)}%`;
+      }
+    };
+
+    // Update the progress bar when the current page changes
+    survey.onCurrentPageChanged.add(() => {
+      updateProgressBar();
+    });
+
+    // Initial progress bar update
+    updateProgressBar();
+  }, [survey]);
+
+  return (
+    <div
+    className={cn("border rounded-2xl w-full h-3 relative bg-indigo-100")}
+  >
+    <div
+      ref={progressBarRef}
+      className="w-0 h-full bg-primary text-center text-white rounded-2xl"
+      style={{
+        transition: "width 0.3s ease",
+      }}
+    ></div>
+  </div>
+  )
 }
