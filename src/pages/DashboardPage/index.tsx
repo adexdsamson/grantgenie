@@ -2,8 +2,6 @@
 // import Bar from "@/components/layouts/Charts/Bar";
 import { StatCard } from "./components/StatsCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useRef } from "react";
-import { useResizeObserver } from "usehooks-ts";
 import {
   ApiResponse,
   ApiResponseError,
@@ -17,8 +15,6 @@ import { useQuery } from "@tanstack/react-query";
 import {
   ChartConfig,
   ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
 } from "@/components/ui/chart";
 import {
   AreaChart,
@@ -28,7 +24,6 @@ import {
   Pie,
   Bar,
   BarChart,
-  CartesianGrid,
 } from "recharts";
 import { Tooltip } from "@/components/ui/tooltip";
 // import { Tooltip } from "@/components/ui/tooltip";
