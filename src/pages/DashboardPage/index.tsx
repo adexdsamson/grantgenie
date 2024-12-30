@@ -1,5 +1,3 @@
-// import Line from "@/components/layouts/Charts/Lines";
-// import Bar from "@/components/layouts/Charts/Bar";
 import { StatCard } from "./components/StatsCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -26,8 +24,6 @@ import {
   BarChart,
 } from "recharts";
 import { Tooltip } from "@/components/ui/tooltip";
-// import { Tooltip } from "@/components/ui/tooltip";
-// import { MapList } from "@/components/layouts/MapList";
 
 export const Home = () => {
   const { data } = useQuery<ApiResponse<DashboardResponse>, ApiResponseError>({

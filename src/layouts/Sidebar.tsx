@@ -2,6 +2,7 @@
 import {
   Building2,
   FileText,
+  GalleryVerticalEnd,
   LayoutDashboard,
   Sidebar,
   Users,
@@ -15,7 +16,7 @@ import { useMediaQuery } from "usehooks-ts";
 import { useUser } from "@/store/authSlice";
 import { dashboardPageRoutes } from "@/routes";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { FaUser } from "react-icons/fa";
+import { FaMoneyBillAlt, FaUser } from "react-icons/fa";
 
 type sideBarProps = {
   show: boolean;
@@ -31,12 +32,22 @@ type NavigationItem = {
 };
 
 const Icons = {
-  dashboard: LayoutDashboard,
   home: LayoutDashboard,
-  employees: Users,
+  opportunity: GalleryVerticalEnd,
+  experts: Users,
   agencies: Building2,
   projects: FileText,
+  billing: FaMoneyBillAlt,
 };
+
+const NavigationNames = {
+  home: "Dashboard",
+  opportunity: "Funding Opportunities",
+  experts: "Experts",
+  agencies: "Funding Agencies",
+  projects: "Project",
+  billing: "Billings",
+}
 
 export const SideBar = ({ setShow, show }: sideBarProps) => {
   const user = useUser();
@@ -68,14 +79,11 @@ export const SideBar = ({ setShow, show }: sideBarProps) => {
   };
 
   const renderNavigation = () => {
-    return dashboardPageRoutes?.slice?.(0, 4)?.map?.((item) => {
+    return dashboardPageRoutes?.slice?.(0, 6)?.map?.((item) => {
       const title = item?.path?.split("/")?.[2] as keyof typeof Icons;
       return {
         icon: Icons?.[title],
-        title:
-          Object.keys(Icons).find((item) =>
-            title === "home" ? "dashboard" : item === title
-          ) ?? "",
+        title: NavigationNames[title] ?? "",
         to: item?.path,
         active: isActive(item?.path),
       };
@@ -83,6 +91,7 @@ export const SideBar = ({ setShow, show }: sideBarProps) => {
   };
 
   const navigation: NavigationItem[] = renderNavigation();
+  
 
   const mobileSidebarCss = show
     ? "translate-x-0 absolute h-full z-50 w-80"
@@ -96,7 +105,7 @@ export const SideBar = ({ setShow, show }: sideBarProps) => {
         isMobile ? mobileSidebarCss : sidebarCss
       }`}
     >
-      <div className="mt-5 mb-20">
+      <div className="mt-5 mb-10">
         <div className="flex items-center justify-between px-3 font-sans">
           <div className="h-10 flex items-center gap-1">
             <img src={Img} className="w-full h-full object-contain" />

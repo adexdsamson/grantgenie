@@ -14,9 +14,11 @@ import { ForgotPassword } from "../pages/ForgotPassword";
 
 import { Home } from "@/pages/DashboardPage";
 import { Projects } from "@/pages/Projects";
-import { Employees } from "@/pages/Employees";
+import { Employees } from "@/pages/Experts";
 import { Agencies } from "@/pages/Agency";
 import { ProjectDetail } from "@/pages/Projects/Details";
+import Billing from "@/pages/Billing";
+import { Opportunity } from "@/pages/Opportunities";
 
 export const authenticationPagePaths = {
   Index: "../pages/Register.tsx",
@@ -27,9 +29,11 @@ export const authenticationPagePaths = {
 
 export const dashboardPagePaths = {
   Home: "../pages/DashboardPage/index.tsx",
-  Projects: "../pages/Projects/index.tsx",
-  Employees: "../pages/Employees/index.tsx",
+  Opportunity: "../pages/Opportunities/index.tsx",
   Agencies: "../pages/Agency/index.tsx",
+  Experts: "../pages/Experts/index.tsx",
+  Projects: "../pages/Projects/index.tsx",
+  Billing: "../pages/Billing/index.tsx",
 } as const;
 
 // const pageRoutes = getPageRoutes(authenticationPagePaths);
@@ -37,6 +41,7 @@ export const dashboardPageRoutes = getPageRoutes(
   dashboardPagePaths,
   "dashboard"
 );
+
 
 const publicRoutes = [
   {
@@ -78,9 +83,14 @@ const privateRoutes = [
     path: "/dashboard/projects/:id/welcome",
     element: <ProjectDetail />,
   },
-  // {
-
-  // }
+  {
+    path: "/dashboard/billing",
+    element: <Billing />,
+  },
+  {
+    path: "/dashboard/opportunity",
+    element: <Opportunity />,
+  }
 ];
 
 export const routes = (

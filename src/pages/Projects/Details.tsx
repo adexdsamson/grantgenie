@@ -7,7 +7,7 @@ import { Boxes, Building, Database, Edit } from "lucide-react";
 import Logo from "@/assets/GrantGenie Logo.svg";
 import { Model } from "survey-core";
 import { Survey } from "survey-react-ui";
-import "survey-core/defaultV2.min.css";
+// import "survey-core/defaultV2.min.css";
 import { CustomSurveyPanelless } from "./constants";
 import { cn } from "@/lib/utils";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -23,6 +23,12 @@ import { useToastHandlers } from "@/hooks/useToaster";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ScreenLoader } from "@/components/layouts/ScreenLoader";
 import { useLazyQuery } from "@/hooks/useLazyQuery";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { SurveyData, WizardForm } from "./Layouts/Wizard";
+import { useStep } from "usehooks-ts";
+import { Progress } from "@/components/ui/progress";
+import Spinner from "@/components/ui/Spinner";
 
 export const navigationItems = [
   {
@@ -54,7 +60,7 @@ export const navigationItems = [
 export const ProjectDetail = () => {
   const location = useLocation();
   const [showPage, setShowPage] = useState<"welcome-page" | "question-page">(
-    "welcome-page"
+    "question-page"
   );
 
   const projectId =
@@ -93,7 +99,7 @@ export const ProjectDetail = () => {
   }, [pitchQuery.isSuccess]);
 
   return (
-    <div className="">
+    <div className="min-h-[80vh]">
       <WelcomeBanner
         title="Let's Get Started"
         description="Learn more about the grant and how GrantGenie platform works"
@@ -171,12 +177,14 @@ const WelcomePage = (props: { onNext: () => void }) => {
   );
 };
 
-function convertToSurveyJS(jsonData: any) {
-  const surveyJSON = {
-    title: "",
-    showPreviewBeforeComplete: "showAnsweredQuestions",
-    pages: [] as any[],
-  };
+function convertToSurveyJS(
+  jsonData: PitchFlowResponse["questions"]
+): SurveyData[] {
+  const surveyJSON: SurveyData[] = [];
+
+  if (jsonData === null) {
+    return [];
+  }
 
   const questions = jsonData;
 
@@ -188,19 +196,15 @@ function convertToSurveyJS(jsonData: any) {
       .replace(/\n/g, " ")
       .trim();
 
-    const page = {
-      elements: [
-        {
-          type: "comment",
-          name: `question_${key}`,
-          title: questionData.question.trim(),
-          description: questionData.guidance.trim(),
-          defaultValue: sanitizedSampleAnswer,
-        },
-      ],
+    const page: SurveyData = {
+      name: key,
+      answer: sanitizedSampleAnswer,
+      title: questionData.question.trim(),
+      guidance: questionData.guidance.trim(),
+      type: "input",
     };
 
-    surveyJSON.pages.push(page);
+    surveyJSON.push(page);
   });
 
   return surveyJSON;
@@ -236,7 +240,7 @@ const QuestionPage = (props: QuestionPageProps) => {
     },
   });
 
-  const { mutate } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: async (payload: {
       topic: string;
       employees_involved: number[];
@@ -252,7 +256,7 @@ const QuestionPage = (props: QuestionPageProps) => {
   const [fetchPdf] = useLazyQuery(
     ["generate-pdf", projectUUID],
     async () =>
-      await getRequest(`grants/pitchflows/${projectUUID}/generate-pdf/`),
+      await getRequest(`grants/pitchflows/${projectUUID}/generate-pdf/`)
   );
 
   const answerMutation = useMutation({
@@ -260,7 +264,7 @@ const QuestionPage = (props: QuestionPageProps) => {
       await patchRequest(`grants/pitchflows/${projectUUID}/`, payload),
     onSuccess() {
       success("Answer Submission", "Answer submitted successfully");
-      fetchPdf()
+      fetchPdf();
       navigate("/dashboard/projects");
     },
     onError(err) {
@@ -268,68 +272,50 @@ const QuestionPage = (props: QuestionPageProps) => {
     },
   });
 
-  const surveyJson = {
-    showCompletedPage: true,
-    completedHtml: "Saving and formulating questions...",
-    pages: [
-      {
-        elements: [
-          {
-            name: "topic",
-            title: "Firstly, do you have a topic in mind?",
-            type: "text",
-            isRequired: true,
-          },
-        ],
-      },
-      {
-        elements: [
-          {
-            name: "employees",
-            title: "Select employees involved in the project?",
-            type: "checkbox",
-            choices: props.employees.map((item) => ({
-              value: item.id,
-              text: item.name,
-            })),
-            isRequired: true,
-          },
-        ],
-      },
-    ],
-  };
+  const surveyJson: any[] = [
+    {
+      name: "topic",
+      title: "Firstly, do you have a topic in mind?",
+      answer: "",
+      guidance: "",
+      type: "input",
+    },
+    {
+      name: "employees",
+      title: "Select employees involved in the project?",
+      type: "checkbox",
+      choices: props.employees,
+      answer: "",
+      guidance: "",
+    },
+  ];
 
-  const Json = show ? questionMutation.isSuccess
-    ? convertToSurveyJS(questionMutation.data?.data ?? props.questions) : null
-    : surveyJson;
+  const surveyQuestion = convertToSurveyJS(
+    questionMutation.data?.data ?? props.questions
+  );
 
-  const survey = new Model(Json);
-
-  survey.applyTheme(CustomSurveyPanelless);
-
-  const handleComplete = (survey: Model) => {
+  const handleComplete = (survey: any) => {
+    console.log({ survey })
     if (!show) {
       const payload = {
-        employees_involved: survey.data.employees,
-        topic: survey.data.topic,
+        employees_involved: survey.employees,
+        topic: survey.topic,
       };
 
       mutate(payload);
       return;
     }
 
-    const answers = Object.entries(survey.data).reduce((prev, curr) => {
-      const index = curr?.[0]?.split?.("question_")?.[1];
-      return {
-        ...prev,
-        [index]: curr?.[1],
-      };
-    }, {});
+    // const answers = Object.entries(survey.data).reduce((prev, curr) => {
+    //   const index = curr?.[0]?.split?.("question_")?.[1];
+    //   return {
+    //     ...prev,
+    //     [index]: curr?.[1],
+    //   };
+    // }, {});
 
-    answerMutation.mutate({ answers });
+    // answerMutation.mutate({ answers });
   };
-
-  survey.onComplete.add(handleComplete);
 
   useEffect(() => {
     if (props.hasSubmittedEmploees && props.questions !== null) {
@@ -337,15 +323,17 @@ const QuestionPage = (props: QuestionPageProps) => {
     }
   }, [props.hasSubmittedEmploees, props.questions]);
 
-  return (
-    <div className="mt-5">
-      <ProgressBar {...{ survey }} />
-      <img src={Logo} className="h-14 w-14" />
-
-      <div className="h-full w-full bg-orange-900">
-        <Survey model={survey} />
-      </div>
+  return questionMutation.isPending || isPending ? (
+    <div className="flex items-center justify-center h-[60vh]" >
+      <Spinner />
     </div>
+  ) : (
+    <Wizard
+      {...{
+        survey: show ? surveyQuestion : surveyJson,
+        onSubmit: handleComplete,
+      }}
+    />
   );
 };
 
@@ -362,41 +350,40 @@ function extractUUID(url: string) {
   return match ? match[0] : null;
 }
 
-const ProgressBar = ({ survey }: { survey: Model}) => {
-  const progressBarRef = useRef<HTMLDivElement>(null);
+type WizardProps = {
+  survey: any[];
+  onSubmit: (data: any) => void;
+}
 
-  useEffect(() => {
-    const updateProgressBar = (): void => {
-      const totalPages = survey?.pages?.length || 1;
-      const currentPageNo = (survey?.currentPageNo || 0) + 1;
-      const progress = (currentPageNo / totalPages) * 100;
+const Wizard = ({
+  survey,
+  onSubmit
+}: WizardProps) => {
+  const [
+    current,
+    { canGoToNextStep, canGoToPrevStep, goToNextStep, goToPrevStep },
+  ] = useStep(survey.length);
 
-      if (progressBarRef.current) {
-        progressBarRef.current.style.width = `${progress}%`;
-        // progressBarRef.current.textContent = `${Math.round(progress)}%`;
-      }
-    };
-
-    // Update the progress bar when the current page changes
-    survey.onCurrentPageChanged.add(() => {
-      updateProgressBar();
-    });
-
-    // Initial progress bar update
-    updateProgressBar();
-  }, [survey]);
+  const progress = (current / survey.length) * 100;
 
   return (
-    <div
-    className={cn("border rounded-2xl w-full h-3 relative bg-indigo-100")}
-  >
-    <div
-      ref={progressBarRef}
-      className="w-0 h-full bg-primary text-center text-white rounded-2xl"
-      style={{
-        transition: "width 0.3s ease",
-      }}
-    ></div>
-  </div>
-  )
-}
+    <div className="mt-5 min-h-[70vh]">
+      <Progress {...{ value: progress, className: "h-2" }} />
+      <img src={Logo} className="h-14 w-14" />
+
+      <div className="min-h-[60vh] w-full flex flex-col items-center justify-center">
+        <WizardForm
+          survey={survey}
+          onSubmit={onSubmit}
+          {...{
+            current,
+            goToNextStep,
+            goToPrevStep,
+            canGoToNextStep,
+            canGoToPrevStep,
+          }}
+        />
+      </div>
+    </div>
+  );
+};
