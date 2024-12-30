@@ -75,7 +75,7 @@ export default function OpportunityCard(props: OppHit) {
       }),
   });
 
-  const opportunityData = data?.data;
+  const opportunityData = data?.data as any;
 
   useEffect(() => {
     if (trigger) {
@@ -98,7 +98,7 @@ export default function OpportunityCard(props: OppHit) {
         ) : (
           <>
             <DialogHeader className="contents space-y-0 text-left">
-              <DialogTitle className="px-6 py-6">
+              <DialogTitle className="px-6 pt-6">
                 {opportunityData?.opportunityTitle}
               </DialogTitle>
               <DialogDescription asChild>
@@ -115,21 +115,133 @@ export default function OpportunityCard(props: OppHit) {
                   <TabsContent value="tab-1" className="">
                     <div className="px-6">
                       <ScrollArea className="flex flex-col">
-                        <div className="space-y-4 [&_strong]:font-semibold [&_strong]:text-foreground h-[40vh]">
-                          <div className="space-y-1 mb-3">
-                            <p className="font-extrabold">
+                        <div className="space-y-4 [&_strong]:font-semibold [&_strong]:text-foreground h-[40vh] pb-5">
+                          <div className="space-y-1 mb-8">
+                            <p className="font-extrabold text-base mb-2">
                               <strong>General Information</strong>
                             </p>
-                            <p>{opportunityData.synopsis.synopsisDesc}</p>
+                            <div className="grid grid-cols-4 gap-3">
+                              <div className="text-sm font-medium">
+                                Funding Opportunity Number:
+                              </div>
+                              <div className="col-span-3 justify-end">
+                                {opportunityData?.opportunityNumber}
+                              </div>
+
+                              <div className=" font-semibold">
+                                Funding Opportunity Title:
+                              </div>
+                              <div className="col-span-3 justify-end">
+                                {opportunityData?.[opportunityData.docType]?.agencyName}
+                              </div>
+
+                              <div className=" font-semibold">
+                                Estimated Total Program Funding:
+                              </div>
+                              <div className="col-span-3 justify-end">
+                                {new Intl.NumberFormat("en-US", {
+                                  style: "currency",
+                                  currency: "USD",
+                                }).format(
+                                  parseInt(opportunityData?.[opportunityData.docType]?.estimatedFunding)
+                                )}
+                              </div>
+
+                              <div className=" font-semibold">
+                                Original Closing Date for Applications:
+                              </div>
+                              <div className="col-span-3 justify-end">
+                                {opportunityData?.originalDueDate}
+                              </div>
+
+                              <div className=" font-semibold">
+                                Current Closing Date for Applications:
+                              </div>
+                              <div className="col-span-3 justify-end">
+                                {opportunityData?.originalDueDate}
+                              </div>
+
+                              <div className=" font-semibold">Award Ceiling:</div>
+                              <div className="col-span-3 justify-end">
+                                {new Intl.NumberFormat("en-US", {
+                                  style: "currency",
+                                  currency: "USD",
+                                }).format(
+                                  parseInt(opportunityData?.[opportunityData.docType]?.awardCeiling)
+                                )}
+                              </div>
+
+                              <div className=" font-semibold">Award Floor:</div>
+                              <div className="col-span-3 justify-end">
+                                {new Intl.NumberFormat("en-US", {
+                                  style: "currency",
+                                  currency: "USD",
+                                }).format(
+                                  parseInt(opportunityData?.[opportunityData.docType]?.awardFloor)
+                                )}
+                              </div>
+
+                              <div className=" font-semibold">
+                                Cost Sharing or Matching Requirement:
+                              </div>
+                              <div className="col-span-3 justify-end">
+                                {opportunityData?.[opportunityData.docType]?.costSharing
+                                  ? "Yes"
+                                  : "No"}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="space-y-1 mb-8">
+                            <p className="font-extrabold">
+                              <strong>Eligibility</strong>
+                            </p>
+                            <p
+                              className="mb-2"
+                              dangerouslySetInnerHTML={{
+                                __html:
+                                  opportunityData?.[opportunityData.docType]?.applicantTypes?.[0]
+                                    ?.description,
+                              }}
+                            ></p>
+                            <p
+                              dangerouslySetInnerHTML={{
+                                __html:
+                                  opportunityData?.[opportunityData.docType]
+                                    ?.applicantEligibilityDesc,
+                              }}
+                            ></p>
                           </div>
 
                           <div className="space-y-1 mb-3">
-                            <p className="font-extrabold">
-                              <strong>General Information</strong>
+                            <p className="font-extrabold mb-3">
+                              <strong>Agency Information</strong>
                             </p>
-                            <p>{opportunityData.synopsis.synopsisDesc}</p>
+                            <div className="grid grid-cols-6 gap-2 mb-2">
+                              <div className="justify-self-end font-semibold">
+                                Agency Name
+                              </div>
+                              <div className="col-span-5 justify-end">
+                                {opportunityData?.[opportunityData.docType]?.agencyName}
+                              </div>
+                              <div className="justify-self-end font-semibold">
+                                Description
+                              </div>
+                              <div
+                                className="col-span-5 justify-end"
+                                dangerouslySetInnerHTML={{
+                                  __html: opportunityData?.[opportunityData.docType]?.synopsisDesc,
+                                }}
+                              ></div>
+                              <div className="justify-self-end font-semibold">
+                                Agency Address 
+                              </div>
+                              <div className="col-span-4 justify-end">
+                                {opportunityData?.[opportunityData.docType]?.agencyAddressDesc}
+                              </div>
+                            </div>
                           </div>
-                          
+
                         </div>
                       </ScrollArea>
                     </div>
@@ -138,14 +250,14 @@ export default function OpportunityCard(props: OppHit) {
               </DialogDescription>
             </DialogHeader>
             <DialogFooter className="border-t border-border px-6 py-4 sm:items-center">
-              <DialogClose asChild>
+              {/* <DialogClose asChild>
                 <Button type="button" variant="outline">
-                  Cancel
+                  Close
                 </Button>
               </DialogClose>
               <DialogClose asChild>
-                <Button type="button">I agree</Button>
-              </DialogClose>
+                <Button type="button">Apply</Button>
+              </DialogClose> */}
             </DialogFooter>
           </>
         )}

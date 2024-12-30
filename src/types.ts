@@ -84,6 +84,7 @@ export interface ProjectCreationTrend {
 
 export interface PitchFlowResponse {
   id:                  string;
+  agency_id:                  string;
   user:                number;
   project:             number;
   payment_confirmed:   boolean;
@@ -258,6 +259,7 @@ export interface Synopsis {
   agencyContactPhone:        string;
   agencyContactName:         string;
   agencyContactDesc:         string;
+  agencyAddressDesc:         string;
   synopsisDesc:              string;
   responseDate:              string;
   responseDateDesc:          string;

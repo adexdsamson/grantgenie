@@ -17,7 +17,7 @@ export const TextSurveyInput = ({
   labelClass: string;
 }) => {
   return (
-    <div className={cn("space-y-2 w-full max-w-2xl", rest.containerClass)}>
+    <div className={cn("space-y-2 w-full", rest.containerClass)}>
       <Label
         htmlFor={name}
         className={cn(
@@ -64,7 +64,7 @@ export const TextSurveySelect = ({
   employees: EmployeeListResponse[];
 }) => {
   return (
-    <div className={cn("space-y-2 w-full max-w-2xl")}>
+    <div className={cn("space-y-2 w-full")}>
       <Label htmlFor={name} className={cn("text-3xl block mb-5", labelClass)}>
         {index}. {label}
       </Label>

@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { EmployeeListResponse } from "@/types";
 import { useRef, useState } from "react";
 
-
 export type SurveyData = {
   name: string;
   title: string;
@@ -21,6 +20,7 @@ type WizardFormProps = {
   survey: SurveyData[];
   onSubmit: (value: any) => void;
   current: number;
+  skipPreview: boolean;
   canGoToNextStep: boolean;
   canGoToPrevStep: boolean;
   goToNextStep: () => void;
@@ -40,7 +40,7 @@ export const WizardForm = (props: WizardFormProps) => {
   const [preview, setPreview] = useState(false);
   const formRef = useRef<FormPropsRef>(null);
 
-  const { ForgeForm, formState } = useForge({
+  const { ForgeForm } = useForge({
     defaultValues: getSurveyAnswers(props.survey),
   });
 
@@ -92,16 +92,13 @@ export const WizardForm = (props: WizardFormProps) => {
     )
   );
 
-  console.log({ formState });
-  
-
   const handleSubmit = (data: any) => {
     props.onSubmit(data);
   };
 
   if (preview) {
     return (
-      <div className=" min-w-[35rem] mb-8">
+      <div className=" w-[60vw] mb-8">
         <ForgeForm
           ref={formRef}
           onSubmit={handleSubmit}
@@ -110,17 +107,21 @@ export const WizardForm = (props: WizardFormProps) => {
           {renderPreviewInputs}
         </ForgeForm>
         <div className="flex justify-end w-full mt-4 gap-3">
-          <Button onClick={() =>{
-             formRef.current?.onSubmit()
-             }}>Complete</Button>
+          <Button
+            onClick={() => {
+              formRef.current?.onSubmit();
+            }}
+          >
+            Generate document
+          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className=" min-w-[35rem] mb-8">
-      <ForgeForm onSubmit={handleSubmit} className="flex items-center gap-5">
+    <div className="w-[60vw] mb-8">
+      <ForgeForm ref={formRef} onSubmit={handleSubmit} className="flex items-center gap-5">
         {renderInputs[props.current - 1]}
       </ForgeForm>
       <div className="flex justify-end w-full mt-4 gap-3">
@@ -133,7 +134,15 @@ export const WizardForm = (props: WizardFormProps) => {
           <Button onClick={props.goToNextStep}>Next</Button>
         )}
         {!props.canGoToNextStep && (
-          <Button onClick={() => setPreview((prev) => !prev)}>Submit</Button>
+          <Button
+            onClick={() =>
+              props.skipPreview
+                ? formRef.current?.onSubmit()
+                : setPreview((prev) => !prev)
+            }
+          >
+            Submit
+          </Button>
         )}
       </div>
     </div>

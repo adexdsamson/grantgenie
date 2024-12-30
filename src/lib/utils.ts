@@ -48,3 +48,25 @@ export function checkIfFilesAreCorrectType(files?: File[] | null): boolean {
   }
   return valid;
 }
+
+export const downloadFile = async (fileUrl: string) => {
+  const response = await fetch(fileUrl);
+  const blob = await response.blob();
+  const fileName = getFileNameFromUrl(fileUrl);
+  const downloadUrl = URL.createObjectURL(blob);
+
+  const link = document.createElement('a');
+  link.href = downloadUrl;
+  link.download = fileName;
+
+  document.body.appendChild(link);
+  link.click();
+
+  URL.revokeObjectURL(downloadUrl);
+  document.body.removeChild(link);
+};
+
+const getFileNameFromUrl = (url: string) => {
+  const parts = url.split('/');
+  return parts[parts.length - 1] || '';
+};

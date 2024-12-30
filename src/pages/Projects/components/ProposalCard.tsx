@@ -1,15 +1,5 @@
-// import {
-//   Dialog,
-//   DialogContent,
-//   DialogDescription,
-//   DialogHeader,
-//   DialogTitle,
-//   // DialogTrigger,
-// } from "@/components/ui/dialog";
-// import SignatureCanvas from "react-signature-canvas";
 import { Button } from "@/components/ui/button";
 import { Download, Trash } from "lucide-react";
-// import { useRef, useState } from "react";
 import { useState } from "react";
 import { ReportDialog } from "./ReportDialog";
 import Spinner from "@/components/ui/Spinner";
@@ -70,7 +60,7 @@ export const ReportCard: React.FC<ProposalCardProps> = ({
         return;
       }
 
-      if (!res.data?.[0].agreement_signed || !res.data?.[0].payment_confirmed) {
+      if (!res.data?.[0].agreement_signed) {
         setShow(true);
         return;
       }

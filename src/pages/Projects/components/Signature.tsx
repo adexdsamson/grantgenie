@@ -12,7 +12,7 @@ import {
   postRequest,
 } from "@/lib/axiosInstance";
 import { Forger, useForge } from "@/lib/forge";
-import { createFormData } from "@/lib/utils";
+import { createFormData, downloadFile } from "@/lib/utils";
 import {
   ApiResponse,
   ApiResponseError,
@@ -25,6 +25,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { TextSignature } from "@/components/layouts/FormInputs/TextInput";
 import { Button } from "@/components/ui/button";
 import { useLazyQuery } from "@/hooks/useLazyQuery";
+import { useNavigate } from "react-router-dom";
 
 type AgreementSignature = {
   id: number;
@@ -47,6 +48,7 @@ export const SignatureDialog = ({
   description,
   isLoading,
 }: AgreementSignature) => {
+  const navigate = useNavigate();
   const { error } = useToastHandlers();
 
   const { data } = useQuery<
@@ -72,20 +74,6 @@ export const SignatureDialog = ({
     ["pitchflow", id],
     async () => await getRequest(`grants/pitchflows/?project_id=${id}`)
   );
-
-  const checkoutMutation = useMutation<
-    ApiResponse<{ status: boolean; message: string; data: { url: string } }>,
-    ApiResponseError,
-    { projectId: string }
-  >({
-    mutationFn: async (data: { projectId: string }) =>
-      await postRequest("grants/pitchflows/payment-checkout/", {
-        success_url: `${import.meta.env.VITE_APP_BASE_URL}/dashboard/projects/${data.projectId}/welcome?projectId=${id}`,
-      }),
-    onSuccess(data) {
-      window.open(data.data.data.url, "_self");
-    },
-  });
 
   const { ForgeForm } = useForge({});
 
@@ -113,13 +101,10 @@ export const SignatureDialog = ({
         return;
       }
 
-      checkoutMutation.mutate({
-        projectId: res.data?.[0].id
-      });
-
-      // closeRef.current?.click()
-      // queryClient.invalidateQueries({ queryKey: ["project-lists"] });
-      // success(Toast_Title, "Project created successfully");
+      navigate(
+        `/dashboard/projects/${res.data?.[0].id}/welcome?projectId=${id}`,
+        { state: res.data?.[0] }
+      );
     } catch (err) {
       error(Toast_Title, err as ApiResponseError);
     }
@@ -172,11 +157,20 @@ export const SignatureDialog = ({
               <Button
                 type="submit"
                 isLoading={isPending}
-                className="w-full my-8"
+                className="w-full mt-8 mb-2"
               >
                 Continue
               </Button>
             </ForgeForm>
+            <Button
+              className="w-full mb-5"
+              variant={"ghost"}
+              onClick={async () => {
+                await downloadFile(data?.data?.agreement_link ??  "");
+              }}
+            >
+              Download Agreement
+            </Button>
           </div>
         </ScrollArea>
       </SheetContent>

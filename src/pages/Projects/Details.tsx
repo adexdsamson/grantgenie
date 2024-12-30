@@ -5,11 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Boxes, Building, Database, Edit } from "lucide-react";
 import Logo from "@/assets/GrantGenie Logo.svg";
-import { Model } from "survey-core";
-import { Survey } from "survey-react-ui";
-// import "survey-core/defaultV2.min.css";
-import { CustomSurveyPanelless } from "./constants";
-import { cn } from "@/lib/utils";
+import { cn, downloadFile } from "@/lib/utils";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   ApiResponse,
@@ -23,8 +19,6 @@ import { useToastHandlers } from "@/hooks/useToaster";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ScreenLoader } from "@/components/layouts/ScreenLoader";
 import { useLazyQuery } from "@/hooks/useLazyQuery";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { SurveyData, WizardForm } from "./Layouts/Wizard";
 import { useStep } from "usehooks-ts";
 import { Progress } from "@/components/ui/progress";
@@ -79,24 +73,10 @@ export const ProjectDetail = () => {
     ApiResponse<PitchFlowResponse[]>,
     ApiResponseError
   >({
-    queryKey: ["pitch-flows"],
+    queryKey: ["pitch-flows", projectId],
     queryFn: async () =>
       await getRequest(`grants/pitchflows/?project_id=${projectId}`),
   });
-
-  const { mutate, isPending } = useMutation({
-    mutationFn: async () =>
-      await postRequest(`grants/confirm_payment/${projectUUID}/`, undefined),
-  });
-
-  useEffect(() => {
-    if (
-      pitchQuery.data?.data.length &&
-      !pitchQuery.data?.data[0].payment_confirmed
-    ) {
-      mutate();
-    }
-  }, [pitchQuery.isSuccess]);
 
   return (
     <div className="min-h-[80vh]">
@@ -105,7 +85,7 @@ export const ProjectDetail = () => {
         description="Learn more about the grant and how GrantGenie platform works"
       />
 
-      <ScreenLoader isLoading={isPending || pitchQuery.isLoading} />
+      <ScreenLoader isLoading={pitchQuery.isLoading} />
 
       {showPage === "welcome-page" ? (
         <WelcomePage onNext={() => setShowPage("question-page")} />
@@ -113,8 +93,9 @@ export const ProjectDetail = () => {
         <QuestionPage
           employees={data?.data ?? []}
           questions={pitchQuery.data?.data[0].questions ?? null}
+          agency={pitchQuery.data?.data?.[0]?.agency_id ?? ""}
           hasSubmittedEmploees={
-            pitchQuery.data?.data[0].employees_involved?.length !== 0
+            pitchQuery.data?.data[0].employees_involved !== null
           }
         />
       )}
@@ -211,8 +192,9 @@ function convertToSurveyJS(
 }
 
 type QuestionPageProps = {
-  employees: EmployeeListResponse[];
+  agency: string;
   hasSubmittedEmploees: boolean;
+  employees: EmployeeListResponse[];
   questions: PitchFlowResponse["questions"] | null;
 };
 
@@ -221,8 +203,12 @@ const QuestionPage = (props: QuestionPageProps) => {
   const navigate = useNavigate();
   const { error, success } = useToastHandlers();
   const [show, setShow] = useState(() => (props.questions ? true : false));
+  const [eligibilityCheck, setEligibilityCheck] = useState(false);
 
   const projectUUID = extractUUID(location.pathname);
+  const projectId =
+    parseInt(location.search.split("=")?.[1]) ??
+    (location.state.project as number);
 
   const questionMutation = useMutation<
     ApiResponse<Record<number, QuestionsLink>>,
@@ -233,10 +219,14 @@ const QuestionPage = (props: QuestionPageProps) => {
         `grants/pitchflows/${projectUUID}/generate-questions/`,
         {
           include_answers: true,
+        },
+        {
+          timeout: 600000,
         }
       ),
     onSuccess() {
       setShow(!show);
+      setEligibilityCheck(false)
     },
   });
 
@@ -246,17 +236,17 @@ const QuestionPage = (props: QuestionPageProps) => {
       employees_involved: number[];
     }) => await patchRequest(`grants/pitchflows/${projectUUID}/`, payload),
     onSuccess() {
-      questionMutation.mutate();
+      setEligibilityCheck(true);
     },
     onError(err) {
       error("Pitch", err as ApiResponseError);
     },
   });
 
-  const [fetchPdf] = useLazyQuery(
+  const [fetchPdf, query] = useLazyQuery<unknown, ApiResponse<{ pdf_link: string }>, ApiResponseError>(
     ["generate-pdf", projectUUID],
     async () =>
-      await getRequest(`grants/pitchflows/${projectUUID}/generate-pdf/`)
+      await getRequest(`grants/pitchflows/${projectUUID}/generate-pdf/`),
   );
 
   const answerMutation = useMutation({
@@ -264,8 +254,6 @@ const QuestionPage = (props: QuestionPageProps) => {
       await patchRequest(`grants/pitchflows/${projectUUID}/`, payload),
     onSuccess() {
       success("Answer Submission", "Answer submitted successfully");
-      fetchPdf();
-      navigate("/dashboard/projects");
     },
     onError(err) {
       error("Submitting Answer", err as ApiResponseError);
@@ -295,7 +283,6 @@ const QuestionPage = (props: QuestionPageProps) => {
   );
 
   const handleComplete = (survey: any) => {
-    console.log({ survey })
     if (!show) {
       const payload = {
         employees_involved: survey.employees,
@@ -306,31 +293,68 @@ const QuestionPage = (props: QuestionPageProps) => {
       return;
     }
 
-    // const answers = Object.entries(survey.data).reduce((prev, curr) => {
-    //   const index = curr?.[0]?.split?.("question_")?.[1];
-    //   return {
-    //     ...prev,
-    //     [index]: curr?.[1],
-    //   };
-    // }, {});
-
-    // answerMutation.mutate({ answers });
+    answerMutation.mutate({ answers: survey });
   };
 
   useEffect(() => {
-    if (props.hasSubmittedEmploees && props.questions !== null) {
+    if (props.hasSubmittedEmploees && props.questions === null) {
+      console.log("got here", props.questions, props.hasSubmittedEmploees);
       questionMutation.mutate();
     }
   }, [props.hasSubmittedEmploees, props.questions]);
 
+  const handleDownload = async () => {
+    try {
+      const res = await fetchPdf();
+
+      if(res.data.pdf_link) {
+        await downloadFile(res.data.pdf_link);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  if (answerMutation.isSuccess) {
+    return (
+      <div className="w-[40vw] mx-auto h-[50vh] flex flex-col items-center justify-center">
+        <h6 className="text-2xl text-center mb-10 font-semibold">
+          You have completed the survey questions, download the output document
+          before closing the project
+        </h6>
+        <div className="flex items-center gap-3">
+          <Button
+            variant={"ghost"}
+            onClick={() => navigate("/dashboard/projects")}
+          >
+            Close project
+          </Button>
+          <Button isLoading={query.isLoading} onClick={handleDownload}>
+            Download document
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return questionMutation.isPending || isPending ? (
-    <div className="flex items-center justify-center h-[60vh]" >
+    <div className="flex flex-col items-center justify-center h-[60vh]">
       <Spinner />
+      <p>Wait while we generate the appropriate questions</p>
     </div>
+  ) : eligibilityCheck ? (
+    <EligibilityForm
+      {...{
+        projectId,
+        agencyId: props.agency,
+        onSkip: () => questionMutation.mutate(),
+      }}
+    />
   ) : (
     <Wizard
       {...{
         survey: show ? surveyQuestion : surveyJson,
+        skipPreview: show ? false : true,
         onSubmit: handleComplete,
       }}
     />
@@ -352,13 +376,11 @@ function extractUUID(url: string) {
 
 type WizardProps = {
   survey: any[];
+  skipPreview: boolean;
   onSubmit: (data: any) => void;
-}
+};
 
-const Wizard = ({
-  survey,
-  onSubmit
-}: WizardProps) => {
+const Wizard = ({ survey, skipPreview, onSubmit }: WizardProps) => {
   const [
     current,
     { canGoToNextStep, canGoToPrevStep, goToNextStep, goToPrevStep },
@@ -377,12 +399,70 @@ const Wizard = ({
           onSubmit={onSubmit}
           {...{
             current,
+            skipPreview,
             goToNextStep,
             goToPrevStep,
             canGoToNextStep,
             canGoToPrevStep,
           }}
         />
+      </div>
+    </div>
+  );
+};
+
+type EligibilityProps = {
+  agencyId: string;
+  projectId: number;
+  onSkip: () => void;
+};
+
+export interface EligibilityResponseData {
+  eligibility_percentage: number;
+  text_assessment: string;
+  error: null;
+}
+
+const EligibilityForm = (props: EligibilityProps) => {
+  const [data, setData] = useState<EligibilityResponseData | null>(null);
+  const { error } = useToastHandlers();
+
+  const { mutate, isPending } = useMutation<
+    ApiResponse<EligibilityResponseData>,
+    ApiResponseError
+  >({
+    mutationFn: async () =>
+      await postRequest(`grants/check-eligibility/${props.agencyId}/`, {
+        project_id: props.projectId,
+      }),
+    onSuccess(data) {
+      setData(data.data);
+    },
+    onError(err) {
+      error("Eligibility", err as ApiResponseError);
+    },
+  });
+
+  return (
+    <div className="flex flex-col items-center justify-center h-[60vh] w-[35rem] mx-auto">
+      {!data && (
+        <h6 className="text-2xl">
+          Would you like to check the project Eligibility
+        </h6>
+      )}
+      {data && <h5>Eligibility Score: {data.eligibility_percentage}% </h5>}
+      {data && (
+        <div dangerouslySetInnerHTML={{ __html: data.text_assessment }} />
+      )}
+      <div className="w-full flex justify-end mt-3 gap-3">
+        <Button onClick={props.onSkip} variant={"outline"}>
+          {data ? "Continue" : "Skip"}
+        </Button>
+        {!data && (
+          <Button isLoading={isPending} onClick={() => mutate()}>
+            Check Eligibility
+          </Button>
+        )}
       </div>
     </div>
   );
