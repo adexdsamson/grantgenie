@@ -9,7 +9,6 @@ import { useToastHandlers } from "@/hooks/useToaster";
 import {
   fileUploadRequest,
   getRequest,
-  postRequest,
 } from "@/lib/axiosInstance";
 import { Forger, useForge } from "@/lib/forge";
 import { createFormData, downloadFile } from "@/lib/utils";
