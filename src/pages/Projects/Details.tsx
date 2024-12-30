@@ -1,11 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { SidebarNav } from "./components/NavigationItem";
 import { WelcomeBanner } from "./components/WelcomeBanner";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Boxes, Building, Database, Edit } from "lucide-react";
 import Logo from "@/assets/GrantGenie Logo.svg";
-import { cn, downloadFile } from "@/lib/utils";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   ApiResponse,
@@ -23,6 +22,7 @@ import { SurveyData, WizardForm } from "./Layouts/Wizard";
 import { useStep } from "usehooks-ts";
 import { Progress } from "@/components/ui/progress";
 import Spinner from "@/components/ui/Spinner";
+import { downloadFile } from "@/lib/utils";
 
 export const navigationItems = [
   {
@@ -59,7 +59,6 @@ export const ProjectDetail = () => {
 
   const projectId =
     location.search.split("=")?.[1] ?? (location.state.project as number);
-  const projectUUID = extractUUID(location.pathname);
 
   const { data } = useQuery<
     ApiResponse<EmployeeListResponse[]>,

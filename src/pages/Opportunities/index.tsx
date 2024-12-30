@@ -11,7 +11,6 @@ import {
 } from "@/types";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import Placeholder from "@/assets/image.png";
 import { getLocalTimeZone, today } from "@internationalized/date";
 import { CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import {
@@ -32,7 +31,7 @@ import {
   Popover,
 } from "react-aria-components";
 import { Input } from "@/components/ui/input";
-import { ArrowRight, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { TextInputProps } from "@/components/layouts/FormInputs/TextInput";
 import { useDebounceCallback } from "usehooks-ts";
 import {

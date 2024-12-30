@@ -5,10 +5,10 @@ import {
   SingleOpportunityResponse,
 } from "@/types";
 import Placeholder from "@/assets/image.png";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogClose,
+  // DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -64,7 +64,7 @@ const Card = (props: OppHit & any) => {
 export default function OpportunityCard(props: OppHit) {
   const [trigger, setTrigger] = useState(false);
 
-  const { mutate, data, isPending, isSuccess } = useMutation<
+  const { mutate, data, isPending } = useMutation<
     ApiResponse<SingleOpportunityResponse>,
     ApiResponseError
   >({
