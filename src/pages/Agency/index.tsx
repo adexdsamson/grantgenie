@@ -24,7 +24,7 @@ export const Agencies = () => {
       <header className="flex flex-wrap gap-10 justify-between items-start px-6 pt-11 pb-20 mt-9 w-full rounded-2xl bg-indigo-300 bg-opacity-40 min-h-[221px] max-md:px-5 max-md:max-w-full">
         <ContentHeader
           title="Agencies"
-          description="With the information you provide, our AI crafts presentations that include essential elements like problem statements, market opportunity, competitive analysis, and revenue models.."
+          description="Explore the platform to view supported agencies, or add an agency that aligns with your goals instantly—no need to wait for platform support.."
         />
 
         <CreateAgency />

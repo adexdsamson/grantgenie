@@ -63,7 +63,6 @@ export const ReportDialog = ({
     }
 
     if (!payment_confirmed) {
-      checkoutMutation.mutate();
       return;
     }
   };
@@ -85,15 +84,7 @@ export const ReportDialog = ({
           <ChevronRight className="w-4 h-4" />
         )}
       </Button>
-        {/* <ProjectTypeCard
-          {...{
-            icon: "https://cdn.builder.io/api/v1/image/assets/TEMP/2a2328b2c77bb6d89d84dfa0f5a26ed5bee01218709024724ca49867929f2a42?placeholderIfAbsent=true&apiKey=877fbded3c1141a18415be7a6b510b08",
-            title: "Grants and Contracts",
-            description:
-              "Enhances the grant application process for startups and businesses",
-            isSelected: true,
-          }}
-        /> */}
+    
       {/* </DialogTrigger> */}
       <DialogContent className="max-w-none w-[28rem]">
         <DialogHeader>

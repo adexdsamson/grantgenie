@@ -25,6 +25,7 @@ type WizardFormProps = {
   canGoToPrevStep: boolean;
   goToNextStep: () => void;
   goToPrevStep: () => void;
+  isLoading: boolean;
 };
 
 const getSurveyAnswers = (survey: WizardFormProps["survey"]) => {
@@ -108,6 +109,7 @@ export const WizardForm = (props: WizardFormProps) => {
         </ForgeForm>
         <div className="flex justify-end w-full mt-4 gap-3">
           <Button
+            isLoading={props.isLoading}
             onClick={() => {
               formRef.current?.onSubmit();
             }}
@@ -121,9 +123,14 @@ export const WizardForm = (props: WizardFormProps) => {
 
   return (
     <div className="w-[60vw] mb-8">
-      <ForgeForm ref={formRef} onSubmit={handleSubmit} className="flex items-center gap-5">
+      <ForgeForm
+        ref={formRef}
+        onSubmit={handleSubmit}
+        className="flex items-center gap-5"
+      >
         {renderInputs[props.current - 1]}
       </ForgeForm>
+
       <div className="flex justify-end w-full mt-4 gap-3">
         {props.canGoToPrevStep && (
           <Button variant={"outline"} onClick={props.goToPrevStep}>
@@ -141,7 +148,7 @@ export const WizardForm = (props: WizardFormProps) => {
                 : setPreview((prev) => !prev)
             }
           >
-            Submit
+            Preview
           </Button>
         )}
       </div>

@@ -92,7 +92,7 @@ export const CreateEmployeeDialog = () => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Add Employee</Button>
+        <Button>Add Expert</Button>
       </DialogTrigger>
       <DialogContent>
         <ForgeForm ref={ref} onSubmit={handleSubmit}>

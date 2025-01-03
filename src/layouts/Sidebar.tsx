@@ -109,15 +109,15 @@ export const SideBar = ({ setShow, show }: sideBarProps) => {
         <div className="flex items-center justify-between px-3 font-sans">
           <div className="h-10 flex items-center gap-1">
             <img src={Img} className="w-full h-full object-contain" />
-            <h4 className="font-semibold text-sm">GrantsGenie</h4>
+            <h4 className="font-semibold text-sm">GrantGenie</h4>
           </div>
 
-          <div
+          {/* <div
             onClick={() => setShow(!show)}
             className="h-8 w-8 rounded-full grid place-items-center cursor-pointer"
           >
             <Sidebar className="" />
-          </div>
+          </div> */}
         </div>
       </div>
 

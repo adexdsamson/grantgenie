@@ -1,11 +1,29 @@
+import { Button } from "@/components/ui/button";
+import Spinner from "@/components/ui/Spinner";
+import { getRequest, postRequest } from "@/lib/axiosInstance";
+import { ApiResponse, ApiResponseError } from "@/types";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Check } from "lucide-react";
+import { loadStripe, StripeElementsOptions } from "@stripe/stripe-js";
+import {
+  PaymentElement,
+  Elements,
+  useStripe,
+  useElements,
+} from "@stripe/react-stripe-js";
+import { BillingCard, Tier } from "./components/BillingCard";
+import { useState } from "react";
+import { useToastHandlers } from "@/hooks/useToaster";
+import { CreateSubscription } from "./layouts/CreateSubscription";
+import { ChangeSubscription } from "./layouts/ChangeSubscription";
 
-const tiers = [
+export const tiers = [
   {
-    name: "Premium",
-    id: "tier-hobby",
+    name: "basic",
+    id: "price_1Qc2tCAKPicG7yG3ZTPIBODd",
     href: "#",
     priceMonthly: "$450",
+    amount: 450,
     description:
       "The perfect plan if you're just getting started with our product.",
     features: [
@@ -18,10 +36,11 @@ const tiers = [
     featured: false,
   },
   {
-    name: "Business",
-    id: "tier-enterprise",
+    name: "premium",
+    id: "price_1Qc2tjAKPicG7yG3UodEJTPF",
     href: "#",
     priceMonthly: "$750",
+    amount: 750,
     description: "Dedicated support and infrastructure for your company.",
     features: [
       "AI assistance",
@@ -34,9 +53,10 @@ const tiers = [
   },
   {
     name: "Enterprise",
-    id: "tier-enterprise",
+    id: "price_1Qc2uFAKPicG7yG3kUP5CDf8",
     href: "#",
     priceMonthly: "$1500",
+    amount: 1500,
     description: "Dedicated support and infrastructure for your company.",
     features: [
       "Everything in business",
@@ -49,138 +69,47 @@ const tiers = [
   },
 ];
 
-function classNames(...classes: string[]) {
+export function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function Billing() {
-  return (
-    <div className="relative isolate bg-white px-6 sm:py-10 lg:px-8">
-      <div
-        aria-hidden="true"
-        className="absolute inset-x-0 -top-3 -z-10 transform-gpu overflow-hidden px-36 blur-3xl"
-      ></div>
-      <div className="mx-auto max-w-4xl text-center">
-        <h2 className="text-base/7 font-semibold text-primary">Pricing</h2>
-        <p className="mt-2 text-balance text-5xl font-semibold tracking-tight text-gray-900 sm:text-6xl">
-          Choose the right plan for you
-        </p>
-      </div>
-      <p className="mx-auto mt-6 max-w-2xl text-pretty text-center text-lg font-medium text-gray-600 sm:text-xl/8">
-        Choose an affordable plan that’s packed with the best features to
-        achieve your goals, or find funds for your business.
-      </p>
-      <div className="mx-auto mt-16 grid max-w-lg grid-cols-1 items-center gap-y-6 sm:mt-20 sm:gap-y-0 lg:max-w-6xl lg:grid-cols-3">
-        {tiers.map((tier, tierIdx) => (
-          <BillingCard {...{ tier, index: tierIdx }} />
-        ))}
-      </div>
-
-      <div className="mt-10">
-        <p className="text-center text-sm">
-          Looking to generate more than 7 projects, contact us{" "}
-          <a href="mailto:info@autogon.ai" className="text-blue-700">
-            here
-          </a>
-        </p>
-      </div>
-    </div>
-  );
+export interface SubscriptionResponse {
+  status: boolean;
+  data: Data;
 }
 
-type Tier = {
-  name: string;
-  id: string;
-  href: string;
-  priceMonthly: string;
-  description: string;
-  features: string[];
-  featured: boolean;
-};
+export interface Data {
+  id: number;
+  subscription_id: string;
+  subscription_status: string;
+  subscription_plan: null;
+  subscription_amount: number;
+  subscription_price_id: string;
+  subscription_start_date: Date;
+  subscription_end_date: Date;
+  created_at: Date;
+  updated_at: Date;
+  user: number;
+}
 
-const BillingCard = ({ tier, index }: { tier: Tier; index: number }) => {
-  return (
-    <div
-      key={tier.id}
-      className={classNames(
-        tier.featured
-          ? "relative bg-primary shadow-2xl"
-          : "bg-white/60 sm:mx-8 lg:mx-0",
-        tier.featured
-          ? ""
-          : index === 0
-          ? "sm:rounded-b-none lg:rounded-3xl"
-          : "sm:rounded-t-none lg:rounded-3xl",
-        "rounded-3xl p-8 ring-1 ring-gray-900/10 sm:p-10"
-      )}
-    >
-      <h3
-        id={tier.id}
-        className={classNames(
-          tier.featured ? "text-[#BCBDD3]" : "text-primary",
-          "text-base/7 font-semibold"
-        )}
-      >
-        {tier.name}
-      </h3>
-      <p className="mt-4 flex items-baseline gap-x-2">
-        <span
-          className={classNames(
-            tier.featured ? "text-white" : "text-gray-900",
-            "text-5xl font-semibold tracking-tight"
-          )}
-        >
-          {tier.priceMonthly}
-        </span>
-        <span
-          className={classNames(
-            tier.featured ? "text-gray-400" : "text-gray-500",
-            "text-base"
-          )}
-        >
-          /month
-        </span>
-      </p>
-      <p
-        className={classNames(
-          tier.featured ? "text-gray-300" : "text-gray-600",
-          "mt-6 text-base/7"
-        )}
-      >
-        {tier.description}
-      </p>
-      <ul
-        role="list"
-        className={classNames(
-          tier.featured ? "text-gray-300" : "text-gray-600",
-          "mt-8 space-y-3 text-sm/6 sm:mt-10"
-        )}
-      >
-        {tier.features.map((feature) => (
-          <li key={feature} className="flex gap-x-3">
-            <Check
-              aria-hidden="true"
-              className={classNames(
-                tier.featured ? "text-indigo-400" : "text-indigo-600",
-                "h-6 w-5 flex-none"
-              )}
-            />
-            {feature}
-          </li>
-        ))}
-      </ul>
-      <a
-        href={tier.href}
-        aria-describedby={tier.id}
-        className={classNames(
-          tier.featured
-            ? "bg-[#BCBDD3] shadow-sm hover:bg-[#BCBDD3] focus-visible:outline-primary"
-            : "text-primary ring-1 ring-inset ring-primary hover:ring-primary focus-visible:outline-primary",
-          "mt-8 block rounded-md px-3.5 py-2.5 text-center text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 sm:mt-10"
-        )}
-      >
-        Subscribe
-      </a>
+export default function Billing() {
+  const { data, error, isPending } = useQuery<
+    ApiResponse<SubscriptionResponse>,
+    ApiResponseError
+  >({
+    queryKey: ["subscription"],
+    queryFn: async () => await getRequest(`billing/subscription/`),
+  });
+
+  return isPending ? (
+    <div className="flex items-center justify-center h-full">
+      <Spinner />
     </div>
+  ) : error?.response?.data.message === "No active subscription found!" ? (
+    <CreateSubscription />
+  ) : (
+    <ChangeSubscription
+      {...{ subscriptionPriceId: data?.data.data.subscription_price_id ?? "" }}
+    />
   );
-};
+}

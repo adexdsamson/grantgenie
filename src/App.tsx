@@ -19,6 +19,8 @@ function App() {
 
   const router = createBrowserRouter(createRoutesFromElements(routes));
 
+
+
   const providers: Providers = {
     types: Sentry.ErrorBoundary,
     props: { fallback: ErrorFallback },

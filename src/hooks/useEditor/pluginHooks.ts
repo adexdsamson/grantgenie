@@ -170,11 +170,12 @@ function createEventHooks<T extends EditorEventKeys>(
 
 export function createPluginHooks(
   plugins: EditorPlugin[],
-  pluginFunction: PluginFunctions
-): Partial<EditorProps> {
-  const pluginHooks: Partial<EditorProps> = {};
+  pluginFunction: PluginFunctions,
+  defaultProps: Pick<EditorProps, "onChange" | "editorState">
+): EditorProps {
+  let pluginHooks: EditorProps = defaultProps;
 
-  //onchange is here ignored
+  //onchange here is ignored
   const handledAttributes = new Set<EditorKeys>(["onChange"]);
 
   plugins.forEach((plugin: EditorPlugin) => {
@@ -216,5 +217,6 @@ export function createPluginHooks(
       }
     });
   });
+
   return pluginHooks;
 }

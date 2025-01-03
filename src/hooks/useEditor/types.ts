@@ -50,7 +50,7 @@ export interface EditorPlugin {
   onChange?: (
     editorState: EditorState,
     pluginFunctions: PluginFunctions
-  ) => EditorState;
+  ) => void;
   willUnmount?: (pluginFunctions: GetSetEditorState) => void;
 
   // Events passed from the draft-js editor back to all plugins

@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
-import { SidebarNav } from "./components/NavigationItem";
 import { WelcomeBanner } from "./components/WelcomeBanner";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Boxes, Building, Database, Edit } from "lucide-react";
 import Logo from "@/assets/GrantGenie Logo.svg";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
@@ -22,39 +20,21 @@ import { SurveyData, WizardForm } from "./Layouts/Wizard";
 import { useStep } from "usehooks-ts";
 import { Progress } from "@/components/ui/progress";
 import Spinner from "@/components/ui/Spinner";
-import { downloadFile } from "@/lib/utils";
+import { cn, downloadFile } from "@/lib/utils";
+import Markdown from "react-markdown";
+import { useUser } from "@/store/authSlice";
 
-export const navigationItems = [
-  {
-    text: "Welcome to your GrantGenie application",
-    iconSrc: Boxes,
-    title: "Welcome to your GrantGenie application",
-    body: "Borem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus. Sed dignissim metus nec fringilla accumsan, risus sem sollicitudin lacus, utinterdum tellus elit sed risus. Maecenas eget condimentum velit, sit amet feugiat lectus. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Praesent auctor purus luctus enim egestas, ac scelerisque ante pulvinar. Donec ut rhoncus ex. Suspendisse ac rhoncus nisl, eu tempor urna. Curabitur vel bibendum lorem. Morbi convallis convalli diam sit amet lacinia. Aliquam in elementum tellus. \n Curabitur tempor quis eros tempus lacinia. Nam bibendum pellentesque quam a convallis. Sed ut vulputate nisi. Integer in felis sed leo vestibulum venenatis. Suspendisse quis arcu sem. Aenean feugiat ex eu vestibulum vestibulum. Morbi a eleifend magna. Nam metus lacus, porttitor eu mauris a, blandit ultrices nibh. Mauris sit amet magna non ligula vestibulum eleifend. Nulla varius volutpat turpis sed lacinia. Nam eget mi in purus lobortis eleifend. Sed nec ante dictum sem condimentu ullamcorper quis venenatis nisi. Proin vitae facilisis nisi, ac posuere leo. \n nisi, sollicitudin at nisi nec, fermentum congue felis. Quisque mauris dolor, fringilla sed tincidunt ac, finibus non odio. Sed vitae mauris nec ante pretium finibus. Donec nisl neque, pharetra ac elit eu, faucibus aliquam ligula. Nullam dictum, tellus tincidunt tempor laoreet, nibh elit sollicitudin felis, eget feugiat sapien diam nec nisl. Aenean gravida turpis nisi, consequat dictum risus dapibus a. Duis felis ante, varius in neque eu, tempor suscipit sem. Maecenas ullamcorper gravida sem sit amet cursus. Etiam pulvinar purus vitae justo pharetra consequat. Mauris id mi ut arcu feugiat maximus. Mauris consequat tellus id tempus aliquet. \n Vestibulum dictum ultrices elit a luctus. Sed in ante utleo congue posuere at sit amet ligula. Pellentesque eget augue nec nisl sodales blandit sed et sem. Aenean quis finibus arcu, in hendrerit purus. Praesent ac aliquet lorem. Morbi feugiat aliquam ligula, et vestibulum ligula hendrerit vitae. Sed ex lorem, pulvinar sed auctor sit amet, molestie a nibh. Ut euismod nisl arcu, sed placerat nulla volutpat aliquet. Ut id convallis nisl. Ut mauris leo, lacinia sed elit id, sagittis rhoncus odio. Pellentesque sapien libero, lobortis a placerat et, malesuada sit amet dui. Nam sem sapien, congue eu rutrum nec, pellentesque eget ligula.  <br /> Nunc tempor interdum ex, sed cursus nunc egestas aliquet. Pellentesque interdum vulputate elementum. Donec erat diam, pharetra nec enim ut, bibendum pretium tellus. Vestibulum et turpis nibh. Cras vel ornare velit, ac pretium arcu. Cras justo augue, finibus id sollicitudin et, rutrum eget metus. Suspendisse ut mauris eu massa pulvinar sollicitudin vel sed enim. Pellentesque viverra arcu et dignissim vehicula. Donec a velit ac dolor dapibus pellentesque sit amet at erat. Phasellus porttitor, justo eu ultrices vulputate, nisi mi placerat lectus, sed rutrum tellus est id urna. Aliquam pellentesque odio metus, sit amet imperdiet nisl sodales eu. Quisque viverra nunc nec vestibulum dapibus. Integer nec diam a libero tincidunt varius sed vel odio. Donec rutrum dapibus massa, vel tempor nulla porta id. Suspendisse vulputate fermentum sem sollicitudin facilisis. Aliquam vehicula sapien nec ante auctor, quis mollis leo tincidunt.",
-  },
-  {
-    text: "The United Nations Democracy Fund Program",
-    iconSrc: Building,
-    title: "The United Nations Democracy Fund Program",
-    body: "Borem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus. Sed dignissim metus nec fringilla accumsan, risus sem sollicitudin lacus, utinterdum tellus elit sed risus. Maecenas eget condimentum velit, sit amet feugiat lectus. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Praesent auctor purus luctus enim egestas, ac scelerisque ante pulvinar. Donec ut rhoncus ex. Suspendisse ac rhoncus nisl, eu tempor urna. Curabitur vel bibendum lorem. Morbi convallis convalli diam sit amet lacinia. Aliquam in elementum tellus. \n  \n nisi, sollicitudin at nisi nec, fermentum congue felis. Quisque mauris dolor, fringilla sed tincidunt ac, finibus non odio. Sed vitae mauris nec ante pretium finibus. Donec nisl neque, pharetra ac elit eu, faucibus aliquam ligula. Nullam dictum, tellus tincidunt tempor laoreet, nibh elit sollicitudin felis, eget feugiat sapien diam nec nisl. Aenean gravida turpis nisi, consequat dictum risus dapibus a. Duis felis ante, varius in neque eu, tempor suscipit sem. Maecenas ullamcorper gravida sem sit amet cursus. Etiam pulvinar purus vitae justo pharetra consequat. Mauris id mi ut arcu feugiat maximus. Mauris consequat tellus id tempus aliquet. \n Vestibulum dictum ultrices elit a luctus. Sed in ante utleo congue posuere at sit amet ligula. Pellentesque eget augue nec nisl sodales blandit sed et sem. Aenean quis finibus arcu, in hendrerit purus. Praesent ac aliquet lorem. Morbi feugiat aliquam ligula, et vestibulum ligula hendrerit vitae. Sed ex lorem, pulvinar sed auctor sit amet, molestie a nibh. Ut euismod nisl arcu, sed placerat nulla volutpat aliquet. Ut id convallis nisl. Ut mauris leo, lacinia sed elit id, sagittis rhoncus odio. Pellentesque sapien libero, lobortis a placerat et, malesuada sit amet dui. Nam sem sapien, congue eu rutrum nec, pellentesque eget ligula.  <br /> Nunc tempor interdum ex, sed cursus nunc egestas aliquet. Pellentesque interdum vulputate elementum. Donec erat diam, pharetra nec enim ut, bibendum pretium tellus. Vestibulum et turpis nibh. Cras vel ornare velit, ac pretium arcu. Cras justo augue, quis mollis leo tincidunt.",
-  },
-  {
-    text: "Application Planning",
-    iconSrc: Database,
-    title: "Application Planning",
-    body: "Borem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus. Sed dignissim metus nec fringilla accumsan, risus sem sollicitudin lacus, utinterdum tellus elit sed risus. Maecenas eget condimentum velit, sit amet feugiat lectus. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Praesent auctor purus luctus enim egestas, ac scelerisque ante pulvinar. Donec ut rhoncus ex. Suspendisse ac rhoncus nisl, eu tempor urna. Curabitur vel bibendum lorem. Morbi convallis convalli diam sit amet lacinia. Aliquam in elementum tellus. \n Curabitur tempor quis eros tempus lacinia. Nam bibendum pellentesque quam a convallis. Sed ut vulputate nisi. Integer in felis sed leo vestibulum venenatis. Suspendisse quis arcu sem. Aenean feugiat ex eu vestibulum vestibulum. Morbi a eleifend magna. Nam metus lacus, porttitor eu mauris a, blandit ultrices nibh. Mauris sit amet magna non ligula vestibulum eleifend. Nulla varius volutpat turpis sed lacinia. Nam eget mi in purus lobortis eleifend. Sed nec ante dictum sem condimentu ullamcorper quis venenatis nisi. Proin vitae facilisis nisi, ac posuere leo. \n nisi, sollicitudin at nisi nec, fermentum congue felis. Quisque mauris dolor, fringilla sed tincidunt ac, finibus non odio. Sed vitae mauris nec ante pretium finibus. Donec nisl neque, pharetra ac elit eu, faucibus aliquam ligula. Nullam dictum, tellus tincidunt tempor laoreet, nibh elit sollicitudin felis, eget feugiat sapien diam nec nisl. Aenean gravida turpis nisi, consequat dictum risus dapibus a. Duis felis ante, varius in neque eu, tempor suscipit sem. Maecenas ullamcorper gravida sem sit amet cursus. Etiam pulvinar purus vitae justo pharetra consequat. Mauris id mi ut arcu feugiat maximus. Mauris consequat tellus id tempus aliquet. \n Vestibulum dictum ultrices elit a luctus. Sed in ante utleo congue posuere at sit amet ligula. Pellentesque eget augue nec nisl sodales blandit sed et sem. Aenean quis finibus arcu, in hendrerit purus. Praesent ac aliquet lorem. Morbi feugiat aliquam ligula, et vestibulum ligula hendrerit vitae. Sed ex lorem, pulvinar sed auctor sit amet, molestie a nibh. Ut euismod nisl arcu, sed placerat nulla volutpat aliquet. Ut id convallis nisl. Ut mauris leo, lacinia sed elit id, sagittis rhoncus odio. Pellentesque sapien libero, lobortis a placerat et, malesuada sit amet dui. Nam sem sapien, congue eu rutrum nec, pellentesque eget ligula.  <br /> Nunc tempor interdum ex, sed cursus nunc egestas aliquet. Pellentesque interdum vulputate elementum. Donec erat diam, pharetra nec enim ut, bibendum pretium tellus. Vestibulum et turpis nibh. Cras vel ornare velit, ac pretium arcu. Cras justo augue, finibus id sollicitudin et, rutrum eget metus. Suspendisse ut mauris eu massa pulvinar sollicitudin vel sed enim. Pellentesque viverra arcu et dignissim vehicula. Donec a velit ac dolor dapibus pellentesque sit amet at erat. Phasellus porttitor, justo eu ultrices vulputate, nisi mi placerat lectus, sed rutrum tellus est id urna. Aliquam pellentesque odio metus, sit amet imperdiet nisl sodales eu. Quisque viverra nunc nec vestibulum dapibus. Integer nec diam a libero tincidunt varius sed vel odio. Donec rutrum dapibus massa, vel tempor nulla porta id. Suspendisse vulputate fermentum sem sollicitudin facilisis. Aliquam vehicula sapien nec ante auctor, quis mollis leo tincidunt.",
-  },
-  {
-    text: "Research for My Application",
-    iconSrc: Edit,
-    title: "Research for My Application",
-    body: "Borem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus. Sed dignissim metus nec fringilla accumsan, risus sem sollicitudin lacus, utinterdum tellus elit sed risus. Maecenas eget condimentum velit, sit amet feugiat lectus. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Praesent auctor purus luctus enim egestas, ac scelerisque ante pulvinar. Donec ut rhoncus ex. Suspendisse ac rhoncus nisl, eu tempor urna. Curabitur vel bibendum lorem. Morbi convallis convalli diam sit amet lacinia. Aliquam in elementum tellus. \n Curabitur tempor quis eros tempus lacinia. Nam bibendum pellentesque quam a convallis. Sed ut vulputate nisi. Integer in felis sed leo vestibulum venenatis. Suspendisse quis arcu sem. Aenean feugiat ex eu vestibulum vestibulum. Morbi a eleifend magna. Nam metus lacus, porttitor eu mauris a, blandit ultrices nibh. Mauris sit amet magna non ligula vestibulum eleifend. Nulla varius volutpat turpis sed lacinia. Nam eget mi in purus lobortis eleifend. Sed nec ante dictum sem condimentu ullamcorper quis venenatis nisi. Proin vitae facilisis nisi, ac posuere leo. \n nisi, sollicitudin at nisi nec, fermentum congue felis. Quisque mauris dolor, fringilla sed tincidunt ac, finibus non odio. Sed vitae mauris nec ante pretium finibus. Donec nisl neque, pharetra ac elit eu, faucibus aliquam ligula. Nullam dictum, tellus tincidunt tempor laoreet, nibh elit sollicitudin felis, eget feugiat sapien diam nec nisl. Aenean gravida turpis nisi, consequat dictum risus dapibus a. Duis felis ante, varius in neque eu, tempor suscipit sem. Maecenas ullamcorper gravida sem sit amet cursus. Etiam pulvinar purus vitae justo pharetra consequat. Mauris id mi ut arcu feugiat maximus. Mauris consequat tellus id tempus aliquet. \n Vestibulum dictum ultrices elit a luctus. Sed in ante utleo congue posuere at sit amet ligula. Pellentesque eget augue nec nisl sodales blandit sed et sem. Aenean quis finibus arcu, in hendrerit purus. Praesent ac aliquet lorem. Morbi feugiat aliquam ligula, et vestibulum ligula hendrerit vitae. Sed ex lorem, pulvinar sed auctor sit amet, molestie a nibh. Ut euismod nisl arcu, sed placerat nulla volutpat aliquet. Ut id convallis nisl. Ut mauris leo, lacinia sed elit id, sagittis rhoncus odio. Pellentesque sapien libero, lobortis a placerat et, malesuada sit amet dui. Nam sem sapien, congue eu rutrum nec, pellentesque eget ligula.  <br /> Nunc tempor interdum ex, sed cursus nunc egestas aliquet. Pellentesque interdum vulputate elementum. Donec erat diam, pharetra nec enim ut, bibendum pretium tellus. Vestibulum et turpis nibh. Cras vel ornare velit, ac pretium arcu. Cras justo augue, finibus id sollicitudin et, rutrum eget metus. Suspendisse ut mauris eu massa pulvinar sollicitudin vel sed enim. Pellentesque viverra arcu et dignissim vehicula. Donec a velit ac dolor dapibus pellentesque sit amet at erat. Phasellus porttitor, justo eu ultrices vulputate, nisi mi placerat lectus, sed rutrum tellus est id urna. Aliquam pellentesque odio metus, sit amet imperdiet nisl sodales eu. Quisque viverra nunc nec vestibulum dapibus. Integer nec diam a libero tincidunt varius sed vel odio. Donec rutrum dapibus massa, vel tempor nulla porta id. Suspendisse vulputate fermentum sem sollicitudin facilisis. Aliquam vehicula sapien nec ante auctor, quis mollis leo tincidunt.",
-  },
-];
+// const navigationIcons = {
+//   1: Boxes,
+//   2: Building,
+//   3: Database,
+//   4: Edit,
+// };
 
 export const ProjectDetail = () => {
   const location = useLocation();
   const [showPage, setShowPage] = useState<"welcome-page" | "question-page">(
-    "question-page"
+    "welcome-page"
   );
 
   const projectId =
@@ -87,13 +67,17 @@ export const ProjectDetail = () => {
       <ScreenLoader isLoading={pitchQuery.isLoading} />
 
       {showPage === "welcome-page" ? (
-        <WelcomePage onNext={() => setShowPage("question-page")} />
+        <WelcomePage
+          projectId={pitchQuery.data?.data?.[0].agency_id ?? null}
+          onNext={() => setShowPage("question-page")}
+        />
       ) : (
         <QuestionPage
           employees={data?.data ?? []}
+          expertsInvolved={pitchQuery.data?.data[0].employees_involved ?? []}
           questions={pitchQuery.data?.data[0].questions ?? null}
           agency={pitchQuery.data?.data?.[0]?.agency_id ?? ""}
-          hasSubmittedEmploees={
+          hasSubmittedEmployees={
             pitchQuery.data?.data[0].employees_involved !== null
           }
         />
@@ -102,55 +86,89 @@ export const ProjectDetail = () => {
   );
 };
 
-const WelcomePage = (props: { onNext: () => void }) => {
-  const [activeTab, setActiveTab] = useState(0);
+//
+
+export interface WelcomeDescriptionType {
+  status: string;
+  data: Data;
+}
+
+export interface Data {
+  text: string;
+  title: string;
+  body: string;
+}
+
+const WelcomePage = (props: {
+  onNext: () => void;
+  projectId: string | null;
+}) => {
+  // const [activeTab, setActiveTab] = useState(0);
+
+  const { data, isPending } = useQuery<
+    ApiResponse<WelcomeDescriptionType>,
+    ApiResponseError
+  >({
+    queryKey: ["welcome-page", props.projectId],
+    queryFn: async () =>
+      await getRequest(`grants/agencies/${props.projectId}/welcome/`),
+    enabled: props.projectId !== null,
+  });
 
   const handleTab = () => {
-    navigationItems.length === activeTab + 1
-      ? props.onNext()
-      : setActiveTab((prev) => prev + 1);
+    props.onNext();
+    // navigationItems.length === activeTab + 1
+    //   ? props.onNext()
+    //   : setActiveTab((prev) => prev + 1);
   };
+
+  if (isPending) {
+    return (
+      <div className="h-[60vh] max-md:mt-10 max-md:mb-2.5 mt-14">
+        <div className="bg-gray-200 h-10 w-full animate-pulse max-w-xl" />
+        <div className="mt-5">
+          <div className="bg-gray-300 h-3 w-full animate-pulse mt-5" />
+          <div className="bg-gray-300 h-3 w-full animate-pulse mt-5 max-w-5xl" />
+          <div className="bg-gray-300 h-3 w-full animate-pulse mt-5 max-w-4xl" />
+          <div className="bg-gray-300 h-3 w-full animate-pulse mt-5" />
+          <div className="bg-gray-300 h-3 w-full animate-pulse mt-5 max-w-5xl" />
+          <div className="bg-gray-300 h-3 w-full animate-pulse mt-5" />
+          <div className="bg-gray-300 h-3 w-full animate-pulse mt-5" />
+          <div className="bg-gray-300 h-3 w-full animate-pulse mt-5 max-w-5xl" />
+          <div className="bg-gray-300 h-3 w-full animate-pulse mt-5 max-w-4xl" />
+          <div className="bg-gray-300 h-3 w-full animate-pulse mt-5" />
+          <div className="bg-gray-300 h-3 w-full animate-pulse mt-5 max-w-5xl" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mt-14 w-full max-w-[1098px] max-md:mt-10 max-md:mb-2.5 max-md:max-w-full mb-5">
       <div className="flex gap-5 max-md:flex-col">
-        <div className="flex flex-col w-[26%] max-md:ml-0 max-md:w-full">
-          {navigationItems.map((item, index) => (
-            <>
-              <SidebarNav
-                key={index}
-                index={index}
-                text={item.text}
-                iconSrc={item.iconSrc}
-                isActive={index <= activeTab}
-                lastItem={navigationItems.length - 1}
-              />
-            </>
-          ))}
-        </div>
-
         <ScrollArea>
-          <div className="flex flex-col ml-5 h-[36rem] max-md:ml-0 max-md:w-full">
+          <div className="flex flex-col ml-5 h-fit max-md:ml-0 max-md:w-full">
             <div className="flex flex-col grow text-black max-md:mt-6 max-md:max-w-full">
-              <div className="text-3xl font-semibold tracking-tight leading-9 w-">
-                {navigationItems?.[activeTab]?.title}
+              <div className="text-3xl font-semibold tracking-tight leading-9 max-w-4xl">
+                {data?.data.data.title}
               </div>
               <div className="mt-4 text-base leading-7 max-md:max-w-full">
-                {navigationItems?.[activeTab]?.body}
+                <Markdown>{data?.data.data?.body}</Markdown>
               </div>
             </div>
           </div>
         </ScrollArea>
       </div>
 
-      <div className="flex items-center justify-end mt-5 gap-3">
-        {activeTab !== 0 && (
+      <div className="flex items-center justify-end mt-10 gap-3">
+        {/* {activeTab !== 0 && (
           <Button variant={"ghost"} onClick={handleTab}>
             {"Prev"}
           </Button>
-        )}
+        )} */}
         <Button onClick={handleTab}>
-          {navigationItems.length === activeTab + 1 ? "Start" : "Next"}
+          {/* {navigationItems.length === activeTab + 1 ? "Start" : "Next"} */}
+          Start Application
         </Button>
       </div>
     </div>
@@ -192,12 +210,14 @@ function convertToSurveyJS(
 
 type QuestionPageProps = {
   agency: string;
-  hasSubmittedEmploees: boolean;
+  expertsInvolved: number[];
+  hasSubmittedEmployees: boolean;
   employees: EmployeeListResponse[];
   questions: PitchFlowResponse["questions"] | null;
 };
 
 const QuestionPage = (props: QuestionPageProps) => {
+  const user = useUser()
   const location = useLocation();
   const navigate = useNavigate();
   const { error, success } = useToastHandlers();
@@ -225,7 +245,7 @@ const QuestionPage = (props: QuestionPageProps) => {
       ),
     onSuccess() {
       setShow(!show);
-      setEligibilityCheck(false)
+      setEligibilityCheck(false);
     },
   });
 
@@ -242,10 +262,16 @@ const QuestionPage = (props: QuestionPageProps) => {
     },
   });
 
-  const [fetchPdf, query] = useLazyQuery<unknown, ApiResponse<{ pdf_link: string }>, ApiResponseError>(
+  const [fetchPdf] = useLazyQuery<
+    unknown,
+    ApiResponse<{ pdf_link: string }>,
+    ApiResponseError
+  >(
     ["generate-pdf", projectUUID],
     async () =>
-      await getRequest(`grants/pitchflows/${projectUUID}/generate-pdf/`),
+      await getRequest(`grants/pitchflows/${projectUUID}/generate-document/`, {
+        timeout: 600000,
+      })
   );
 
   const answerMutation = useMutation({
@@ -272,7 +298,7 @@ const QuestionPage = (props: QuestionPageProps) => {
       title: "Select employees involved in the project?",
       type: "checkbox",
       choices: props.employees,
-      answer: "",
+      answer: props.expertsInvolved ?? [],
       guidance: "",
     },
   ];
@@ -296,41 +322,39 @@ const QuestionPage = (props: QuestionPageProps) => {
   };
 
   useEffect(() => {
-    if (props.hasSubmittedEmploees && props.questions === null) {
-      console.log("got here", props.questions, props.hasSubmittedEmploees);
+    if (props.hasSubmittedEmployees && props.questions === null) {
       questionMutation.mutate();
     }
-  }, [props.hasSubmittedEmploees, props.questions]);
+  }, [props.hasSubmittedEmployees, props.questions]);
 
   const handleDownload = async () => {
     try {
       const res = await fetchPdf();
 
-      if(res.data.pdf_link) {
+      if (res.data.pdf_link) {
         await downloadFile(res.data.pdf_link);
       }
     } catch (error) {
       console.error(error);
     }
-  }
+  };
 
   if (answerMutation.isSuccess) {
     return (
-      <div className="w-[40vw] mx-auto h-[50vh] flex flex-col items-center justify-center">
-        <h6 className="text-2xl text-center mb-10 font-semibold">
-          You have completed the survey questions, download the output document
-          before closing the project
+      <div className="w-[50vw] mx-auto h-[50vh] flex flex-col items-center justify-center">
+        <h6 className="text-xl text-center mb-5">
+          You have completed the survey questions, you will receive the approved documents in your mailbox (<strong>{user?.email}</strong>) after our experts have reviewed the documents within 2 to 3 business working days.
         </h6>
         <div className="flex items-center gap-3">
           <Button
-            variant={"ghost"}
+            // variant={"ghost"}
             onClick={() => navigate("/dashboard/projects")}
           >
             Close project
           </Button>
-          <Button isLoading={query.isLoading} onClick={handleDownload}>
+          {/* <Button isLoading={query.isLoading} onClick={handleDownload}>
             Download document
-          </Button>
+          </Button> */}
         </div>
       </div>
     );
@@ -339,7 +363,12 @@ const QuestionPage = (props: QuestionPageProps) => {
   return questionMutation.isPending || isPending ? (
     <div className="flex flex-col items-center justify-center h-[60vh]">
       <Spinner />
-      <p>Wait while we generate the appropriate questions</p>
+      {questionMutation.isPending && (
+        <p className="max-w-96 text-center">
+          Wait while we generate the appropriate questions, might take up to 10
+          minutes.
+        </p>
+      )}
     </div>
   ) : eligibilityCheck ? (
     <EligibilityForm
@@ -352,6 +381,7 @@ const QuestionPage = (props: QuestionPageProps) => {
   ) : (
     <Wizard
       {...{
+        isLoading: answerMutation.isPending,
         survey: show ? surveyQuestion : surveyJson,
         skipPreview: show ? false : true,
         onSubmit: handleComplete,
@@ -374,12 +404,13 @@ function extractUUID(url: string) {
 }
 
 type WizardProps = {
+  isLoading: boolean;
   survey: any[];
   skipPreview: boolean;
   onSubmit: (data: any) => void;
 };
 
-const Wizard = ({ survey, skipPreview, onSubmit }: WizardProps) => {
+const Wizard = ({ survey, skipPreview, isLoading, onSubmit }: WizardProps) => {
   const [
     current,
     { canGoToNextStep, canGoToPrevStep, goToNextStep, goToPrevStep },
@@ -398,6 +429,7 @@ const Wizard = ({ survey, skipPreview, onSubmit }: WizardProps) => {
           onSubmit={onSubmit}
           {...{
             current,
+            isLoading,
             skipPreview,
             goToNextStep,
             goToPrevStep,
@@ -425,9 +457,10 @@ export interface EligibilityResponseData {
 const EligibilityForm = (props: EligibilityProps) => {
   const [data, setData] = useState<EligibilityResponseData | null>(null);
   const { error } = useToastHandlers();
+  const navigate = useNavigate();
 
   const { mutate, isPending } = useMutation<
-    ApiResponse<EligibilityResponseData>,
+    ApiResponse<{ data: EligibilityResponseData }>,
     ApiResponseError
   >({
     mutationFn: async () =>
@@ -435,7 +468,7 @@ const EligibilityForm = (props: EligibilityProps) => {
         project_id: props.projectId,
       }),
     onSuccess(data) {
-      setData(data.data);
+      setData(data.data.data);
     },
     onError(err) {
       error("Eligibility", err as ApiResponseError);
@@ -443,18 +476,28 @@ const EligibilityForm = (props: EligibilityProps) => {
   });
 
   return (
-    <div className="flex flex-col items-center justify-center h-[60vh] w-[35rem] mx-auto">
+    <div
+      className={cn("flex flex-col items-center justify-center mx-auto", {
+        "w-[60vw] h-full mt-14": data?.eligibility_percentage,
+        "w-[35rem] h-[60vh]": !data?.eligibility_percentage,
+      })}
+    >
       {!data && (
         <h6 className="text-2xl">
           Would you like to check the project Eligibility
         </h6>
       )}
-      {data && <h5>Eligibility Score: {data.eligibility_percentage}% </h5>}
-      {data && (
-        <div dangerouslySetInnerHTML={{ __html: data.text_assessment }} />
-      )}
+      {data && <Markdown>{data.text_assessment}</Markdown>}
       <div className="w-full flex justify-end mt-3 gap-3">
-        <Button onClick={props.onSkip} variant={"outline"}>
+        {data && (
+          <Button
+            onClick={() => navigate("/dashboard/projects")}
+            variant={"destructive"}
+          >
+            Cancel
+          </Button>
+        )}
+        <Button onClick={props.onSkip} variant={data ? "default" : "outline"}>
           {data ? "Continue" : "Skip"}
         </Button>
         {!data && (

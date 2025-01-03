@@ -111,17 +111,6 @@ export const SignatureDialog = ({
 
   return (
     <Sheet open={open} onOpenChange={onOpen}>
-      {/* <SheetTrigger disabled> */}
-      <ProjectTypeCard
-        {...{
-          icon: "https://cdn.builder.io/api/v1/image/assets/TEMP/2a2328b2c77bb6d89d84dfa0f5a26ed5bee01218709024724ca49867929f2a42?placeholderIfAbsent=true&apiKey=877fbded3c1141a18415be7a6b510b08",
-          title,
-          isLoading,
-          description,
-          onClick: onTrigger,
-        }}
-      />
-      {/* </SheetTrigger> */}
 
       <SheetContent className="w-[30rem] sm:max-w-none">
         <SheetHeader>

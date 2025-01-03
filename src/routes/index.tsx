@@ -19,9 +19,12 @@ import { Agencies } from "@/pages/Agency";
 import { ProjectDetail } from "@/pages/Projects/Details";
 import Billing from "@/pages/Billing";
 import { Opportunity } from "@/pages/Opportunities";
+import BillingSuccess from "@/pages/Billing/Success";
+import { LandingPage } from "@/pages/LandingPage";
 
 export const authenticationPagePaths = {
-  Index: "../pages/Register.tsx",
+  Index: "../pages/LandingPage/index.tsx",
+  Register: "../pages/Register.tsx",
   Login: "../pages/Login",
   Verification: "../pages/Verification.tsx",
   ForgotPassword: "../pages/ForgotPassword.tsx",
@@ -34,6 +37,7 @@ export const dashboardPagePaths = {
   Experts: "../pages/Experts/index.tsx",
   Projects: "../pages/Projects/index.tsx",
   Billing: "../pages/Billing/index.tsx",
+  Success: "../pages/Billing/Success.tsx",
 } as const;
 
 // const pageRoutes = getPageRoutes(authenticationPagePaths);
@@ -42,10 +46,9 @@ export const dashboardPageRoutes = getPageRoutes(
   "dashboard"
 );
 
-
 const publicRoutes = [
   {
-    path: "/",
+    path: "/register",
     element: <Index />,
   },
   {
@@ -72,7 +75,7 @@ const privateRoutes = [
     element: <Projects />,
   },
   {
-    path: "/dashboard/employees",
+    path: "/dashboard/experts",
     element: <Employees />,
   },
   {
@@ -88,14 +91,22 @@ const privateRoutes = [
     element: <Billing />,
   },
   {
+    path: "/dashboard/billing/success",
+    element: <BillingSuccess />,
+  },
+  {
     path: "/dashboard/opportunity",
     element: <Opportunity />,
-  }
+  },
 ];
 
 export const routes = (
   <>
     <Route path="/" element={<PublicRoute />} errorElement={<NotFound />}>
+      <Route
+        path={"/"}
+        element={<LandingPage />}
+      />
       {publicRoutes.map((item, index) => (
         <Route
           key={index}

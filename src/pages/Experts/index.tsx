@@ -22,7 +22,7 @@ export const Employees = () => {
     <>
       <header className="flex flex-wrap gap-10 justify-between items-start px-6 pt-11 pb-20 mt-9 w-full rounded-2xl bg-indigo-300 bg-opacity-40 min-h-[221px] max-md:px-5 max-md:max-w-full">
         <ContentHeader
-          title="Employees"
+          title="Experts"
           description="With the information you provide, our AI crafts presentations that include essential elements like problem statements, market opportunity, competitive analysis, and revenue models.."
         />
 
